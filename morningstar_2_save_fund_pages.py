@@ -222,6 +222,8 @@ if __name__ == "__main__":
     download_url_list = get_download_url_list(morningstar_info_list)
     collect_fund_pages(download_url_list)
 
+
+# test
 if __name__ == "__main__":
     login_to_morningstar(global_values.morningstar_url_head["UK"], global_values.cookie_path['UK'])
     login_to_morningstar(global_values.morningstar_url_head["HK"], global_values.cookie_path['HK'])

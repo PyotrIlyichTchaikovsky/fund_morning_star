@@ -1,12 +1,17 @@
 import os
 
 base_dir = r"files"
-fund_pdfs_dir = os.path.join(base_dir, "funds")  # 保存下载的 PDF 文件的目录
-funds_summary_pdf_path = os.path.join(base_dir, "fund-nav.pdf")  # 原始 PDF 文件
-qdii_excel_path = os.path.join(base_dir, "QDII.xlsx")
-isin_excel_path = os.path.join(base_dir, "ISIN.xlsx")
-morningstar_code_excel_path = os.path.join(base_dir, "MorningStar.xlsx")
-morningstar_page_source_dir = os.path.join(base_dir, "morningstar_pages")
+
+hsbc_original_pdf_path = os.path.join(base_dir, "hsbc/fund-nav.pdf")  # 原始 PDF 文件
+hsbc_qdii_excel_path = os.path.join(base_dir, "hsbc/QDII.xlsx")
+hsbc_fund_pdfs_dir = os.path.join(base_dir, "hsbc/funds")  # 保存下载的 PDF 文件的目录
+hsbc_isin_excel_path = os.path.join(base_dir, "hsbc/ISIN_HSBC.xlsx")
+
+sc_original_funds_info_path = os.path.join(base_dir, "sc/funds_table_html_sc.txt")  # 原始 PDF 文件
+sc_isin_excel_path = os.path.join(base_dir, "sc/ISIN_SC.xlsx")
+
+morningstar_code_excel_path = os.path.join(base_dir, "morningstar/MorningStar.xlsx")
+morningstar_page_source_dir = os.path.join(base_dir, "morningstar/morningstar_pages")
 
 morningstar_code_search_url_suffix = "util/SecuritySearch.ashx?source=nav&moduleId=6&ifIncludeAds=True&usrType=f"
 morningstar_fund_level_search_url_suffix = "funds/snapshot/snapshot.aspx?id="  # 后面接上ID

@@ -4,12 +4,12 @@ import re
 import pandas as pd
 import pdfplumber
 
-from global_values import fund_pdfs_dir, qdii_excel_path, funds_summary_pdf_path
+from global_values import hsbc_fund_pdfs_dir, hsbc_qdii_excel_path, hsbc_original_pdf_path
 
 # ========== 全局路径设置 ==========
 
-if not os.path.exists(fund_pdfs_dir):
-    os.makedirs(fund_pdfs_dir)
+if not os.path.exists(hsbc_fund_pdfs_dir):
+    os.makedirs(hsbc_fund_pdfs_dir)
 
 
 # ========== [STEP1]: 生成/更新 QDII.xlsx ==========
@@ -35,7 +35,7 @@ def download_pdf(url, filename):
       - 其他异常 -> 返回 'exception';
       - 成功下载 -> 返回文件绝对路径。
     """
-    file_path = os.path.join(fund_pdfs_dir, filename)
+    file_path = os.path.join(hsbc_fund_pdfs_dir, filename)
     if os.path.exists(file_path):
         print(f"文件 {filename} 已存在，跳过下载。")
         return file_path
@@ -97,9 +97,9 @@ def generate_qdii_excel():
     若不存在 -> 从 fund-nav.pdf 解析表格并生成, 补充下载地址并尝试下载。
     返回一个 DataFrame。
     """
-    if os.path.exists(qdii_excel_path):
+    if os.path.exists(hsbc_qdii_excel_path):
         print("检测到已存在 QDII.xlsx，读取并仅处理 '下载异常' 的URL...")
-        final_df = pd.read_excel(qdii_excel_path, engine='openpyxl')
+        final_df = pd.read_excel(hsbc_qdii_excel_path, engine='openpyxl')
         # 找到下载地址=“下载异常”的行
         exc_rows = final_df[final_df["下载地址"] == "下载异常"].index
         if len(exc_rows) == 0:
@@ -107,13 +107,13 @@ def generate_qdii_excel():
             return final_df
         else:
             update_download_paths(final_df, exc_rows)
-        final_df.to_excel(qdii_excel_path, index=False, engine='openpyxl')
-        print(f"处理完成，结果已覆盖保存到: {qdii_excel_path}")
+        final_df.to_excel(hsbc_qdii_excel_path, index=False, engine='openpyxl')
+        print(f"处理完成，结果已覆盖保存到: {hsbc_qdii_excel_path}")
         return final_df
     else:
         print("未发现 QDII.xlsx，开始解析 PDF 并生成...")
         # 读取 fund-nav.pdf 并解析所有表格
-        with pdfplumber.open(funds_summary_pdf_path) as pdf:
+        with pdfplumber.open(hsbc_original_pdf_path) as pdf:
             all_tables = []
             for page in pdf.pages:
                 table = page.extract_table()
@@ -145,8 +145,8 @@ def generate_qdii_excel():
         # 下载更新
         update_download_paths(final_df)
         # 存 Excel
-        final_df.to_excel(qdii_excel_path, index=False, engine='openpyxl')
-        print(f"结果已保存到: {qdii_excel_path}")
+        final_df.to_excel(hsbc_qdii_excel_path, index=False, engine='openpyxl')
+        print(f"结果已保存到: {hsbc_qdii_excel_path}")
 
 
 if __name__ == "__main__":

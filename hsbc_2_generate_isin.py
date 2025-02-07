@@ -13,7 +13,7 @@ def try_fix_table(table):
             return [row]
         first_column_lines = first_column.split("\n")
         num_lines = len(first_column_lines)
-        if num_lines <= 1: # 本身就只有一列
+        if num_lines <= 1:  # 本身就只有一列
             return [row]
 
         # 其他列按换行符拆分
@@ -100,6 +100,7 @@ def add_column_to_array(two_dim_array, other_rows_value):
 
     return two_dim_array
 
+
 def parse_single_pdf(parse_pdf_path):
     try:
         with pdfplumber.open(parse_pdf_path) as pdf:
@@ -152,7 +153,6 @@ def generate_excel_for_pdf(pdf_path, output_dir):
         # 如果文件已存在，则不生成
         df.to_excel(output_excel_path, index=False, engine='openpyxl')
         print(f"生成 Excel 文件: {output_excel_path}")
-
 
 
 def combine_excel_files(pdf_dir):
@@ -243,4 +243,5 @@ def process_pdfs_and_combine(pdf_dir, pdf_excel_dir, isin_excel_path):
 
 if __name__ == "__main__":
     # 使用示例
-    process_pdfs_and_combine(global_values.fund_pdfs_dir, global_values.fund_pdfs_dir, global_values.isin_excel_path)
+    process_pdfs_and_combine(global_values.hsbc_fund_pdfs_dir, global_values.hsbc_fund_pdfs_dir,
+                             global_values.hsbc_isin_excel_path)

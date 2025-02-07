@@ -1,13 +1,23 @@
 import pandas as pd
+import os
 
 import global_values
 from morningstar_isin_query import get_fund_info_with_retry
 
-import pandas as pd
-import os
+
+class ISINInfo:
+    def __init__(self, isin_id: str):
+        self.isin_id: str = isin_id
+        self.bank_list: [str] = []
+
+    def add_bank(self, bank:str):
+        self.bank_list.append(bank)
+
+    def back_str(self) -> str:
+        return "+".join(self.bank_list)
 
 
-def load_morningstar_code(isin_list, out_excel_path):
+def load_morningstar_code(isin_list: dict[str: ISINInfo], out_excel_path):
     # 初始化或读取已有Excel文件
     if os.path.exists(out_excel_path):
         df = pd.read_excel(out_excel_path)
@@ -17,8 +27,9 @@ def load_morningstar_code(isin_list, out_excel_path):
     # 转换ISIN列为字符串类型
     df['ISIN'] = df['ISIN'].astype(str)
 
-    for isin in isin_list:
-        isin = str(isin).strip()
+    for isin_info in isin_list.values():
+        isin = str(isin_info.isin_id).strip()
+        bank_info = isin_info.back_str()
 
         # ====== 条件检查逻辑 ======
         # 检查是否已有有效记录
@@ -32,6 +43,8 @@ def load_morningstar_code(isin_list, out_excel_path):
 
         if not existing_record.empty:
             print(f"已存在有效ISIN记录：{isin}，跳过处理")
+            # 更新已有记录中的Bank列
+            df.loc[df['ISIN'] == isin, 'Bank'] = bank_info
             continue
 
         source = 'UK'
@@ -62,6 +75,7 @@ def load_morningstar_code(isin_list, out_excel_path):
         # 添加新记录
         new_row = pd.DataFrame([{
             'ISIN': isin,
+            'Bank': bank_info,
             'MorningStarName': morningstar_name,
             'MorningStarID': morningstar_id,
             'Source': source
@@ -73,6 +87,7 @@ def load_morningstar_code(isin_list, out_excel_path):
         df.to_excel(out_excel_path, index=False)
         print(f"已更新ISIN记录：{isin} ->{morningstar_id}({source}: {morningstar_name})")
 
+    df.to_excel(out_excel_path, index=False)
     return df
 
 
@@ -92,6 +107,19 @@ def load_isin(isin_excel_path):
     return isin_array
 
 
+def make_isin_map(isin_map: dict[str: ISINInfo], isin_list: [str], bank: str):
+    for isin_id in isin_list:
+        if isin_id not in isin_map:
+            isin_map[isin_id] = ISINInfo(isin_id)
+        isin_map[isin_id].add_bank(bank)
+
+
 if __name__ == "__main__":
-    isin_list = load_isin(global_values.isin_excel_path)
-    load_morningstar_code(isin_list, global_values.morningstar_code_excel_path)
+    isin_list_hsbc = load_isin(global_values.hsbc_isin_excel_path)
+    isin_list_sc = load_isin(global_values.sc_isin_excel_path)
+
+    isin_map: dict[str: ISINInfo] = {}
+    make_isin_map(isin_map, isin_list_hsbc, "汇丰")
+    make_isin_map(isin_map, isin_list_sc, "渣打")
+
+    load_morningstar_code(isin_map, global_values.morningstar_code_excel_path)

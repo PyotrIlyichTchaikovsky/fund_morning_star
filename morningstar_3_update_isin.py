@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pandas as pd
 
 import global_values
-import process_4_morningstar_score
+import morningstar_2_save_fund_pages
 
 
 class FundInfo:
@@ -110,7 +110,7 @@ def add_to_excel(fund_info: FundInfo, excel_file: str):
 
 if __name__ == "__main__":
     morningstar_file_path = global_values.morningstar_code_excel_path
-    morningstar_info_list = process_4_morningstar_score.get_morningstar_id_list(
+    morningstar_info_list = morningstar_2_save_fund_pages.get_morningstar_id_list(
         morningstar_file_path)
     write_morningstar_excel(morningstar_file_path, morningstar_info_list)
 
