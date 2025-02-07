@@ -11,6 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 import global_values
+import tools
 
 
 # 登录模块
@@ -146,8 +147,19 @@ def collect_fund_pages(download_list: [PageDownloadInfo]):
     for download_info in download_list:
         file_path = os.path.join(global_values.morningstar_page_source_dir,
                                  download_info.morningstar_id + "/" + download_info.source + "/" + download_info.page_name + ".html")
+
+        data_complete = True
         if os.path.exists(file_path):
-            print(f"网页文件已存在：{download_info.morningstar_id}: {download_info.page_name}")
+            print(f"网页文件已存在：{download_info.morningstar_id}: {download_info.page_name}， 检查是否数据完整")
+
+            for cat, check_word in download_info.check_word_list.items():
+                match = tools.filter_file_by_keyword(file_path, check_word)
+                if match is None:
+                    print(f"数据不完整: {cat}")
+                    data_complete = False
+
+        if data_complete:
+            print(f"数据完整！")
             continue
 
         if download_info.source not in driver_dic or driver_dic[download_info.source] is None:
@@ -156,7 +168,6 @@ def collect_fund_pages(download_list: [PageDownloadInfo]):
         driver = driver_dic[download_info.source]
 
         print(f"开始加载网页：{download_info.morningstar_id}-{download_info.page_name}: {download_info.url}")
-        driver.get(download_info.url)
         driver.get(download_info.url)
         check_word_list = download_info.check_word_list
 
