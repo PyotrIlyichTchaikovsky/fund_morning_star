@@ -10,7 +10,7 @@ class ISINInfo:
         self.isin_id: str = isin_id
         self.bank_list: [str] = []
 
-    def add_bank(self, bank:str):
+    def add_bank(self, bank: str):
         self.bank_list.append(bank)
 
     def back_str(self) -> str:
@@ -32,13 +32,13 @@ def load_morningstar_code(isin_list: dict[str: ISINInfo], out_excel_path):
         bank_info = isin_info.back_str()
 
         # ====== 条件检查逻辑 ======
-        # 检查是否已有有效记录
+        # 检查是否已有有效记录：已经存在了ISIN，并且MorningStarName和MorningStarID是有效的（不为空和Exception）
         existing_record = df[
             (df['ISIN'] == isin) &
-            (df['MorningStarName'].notna()) &
-            (df['MorningStarName'].str.contains('Exception') == False) &
-            (df['MorningStarID'].notna()) &
-            (df['MorningStarID'].str.contains('Exception') == False)
+            (df['MorningStarName'].fillna('').str.contains('Exception') == False) &
+            (df['MorningStarName'].fillna('').str.strip() != '') &
+            (df['MorningStarID'].fillna('').str.contains('Exception') == False) &
+            (df['MorningStarID'].fillna('').str.strip() != '')
             ]
 
         if not existing_record.empty:
