@@ -1,5 +1,8 @@
 import os
 
+from base_define import MsMetricTemplate, MetricMatchMethod
+from moring_star_logic import MsPageTemplate
+
 base_dir = r"files"
 
 hsbc_original_pdf_path = os.path.join(base_dir, "hsbc/fund-nav.pdf")  # 原始 PDF 文件
@@ -16,26 +19,83 @@ morningstar_page_source_dir = os.path.join(base_dir, "morningstar/morningstar_pa
 morningstar_code_search_url_suffix = "util/SecuritySearch.ashx?source=nav&moduleId=6&ifIncludeAds=True&usrType=f"
 morningstar_fund_level_search_url_suffix = "funds/snapshot/snapshot.aspx?id="  # 后面接上ID
 
+source_key_uk = "UK"
+source_key_hk = "HK"
+
 morningstar_url_head = {
-    'UK': "https://www.morningstar.co.uk/uk/",
-    'HK': "https://www.morningstar.hk/hk/"
+    source_key_uk: "https://www.morningstar.co.uk/uk/",
+    source_key_hk: "https://www.morningstar.hk/hk/"
 }
 
 morningstar_code_search_url_uk = morningstar_url_head['UK'] + morningstar_code_search_url_suffix
 morningstar_code_search_url_hk = morningstar_url_head['HK'] + morningstar_code_search_url_suffix
 
 cookie_path = {
-    'UK': "files/cookies/cookies_uk.pkl",
-    'HK': "files/cookies/cookies_hk.pkl"
+    source_key_uk: "files/cookies/cookies_uk.pkl",
+    source_key_hk: "files/cookies/cookies_hk.pkl"
+}
+
+morningstar_page_uk_overview = MsPageTemplate(source_key_uk,
+                                              "Overview",
+                                              "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",
+                                              r"snapshotTextColor snapshotTextFontStyle snapshotTitleTable",
+                                              1)
+
+morningstar_page_uk_sustainability = MsPageTemplate(source_key_uk,
+                                                    "SustainabilitySAL",
+                                                    "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
+                                                    r"sal-component-sustainability-title",
+                                                    15)
+
+morningstar_page_hk_performance = MsPageTemplate(source_key_uk,
+                                                 "Performance",
+                                                 "https://www.morningstar.hk/hk/report/fund/performance.aspx?t=morningstar_id&fundservcode=&lang=en-HK",
+                                                 r"sal-mip-quote__star-rating",
+                                                 1)
+morningstar_page_hk_sustainability = MsPageTemplate(source_key_hk,
+                                                    "Sustainability",
+                                                    "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
+                                                    r"sal-component-sustainability-title",
+                                                    15)
+
+morningstar_page_template_dict = {
+    source_key_uk: [morningstar_page_uk_overview, morningstar_page_uk_sustainability],
+    source_key_hk: [morningstar_page_hk_performance, morningstar_page_hk_sustainability]
+}
+
+metric_key_star = "star"
+metric_key_medalist = "medalist"
+metric_key_sustainability = "sustainability"
+
+morningstar_metric_key_list = [metric_key_star, metric_key_medalist, metric_key_sustainability]
+
+morningstar_metric_dict: dict[str: dict[str: MsMetricTemplate]] = {
+    source_key_uk: {
+        metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_uk_overview,
+                                          r"ating_sprite stars(\d)", MetricMatchMethod.REGEX),
+        metric_key_medalist: MsMetricTemplate(metric_key_medalist, morningstar_page_uk_overview,
+                                              r"rating_sprite medalist-rating-(\d)", MetricMatchMethod.REGEX),
+        metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
+                                                    r"sal-sustainability__score sal-sustainability__score--(\d)", MetricMatchMethod.REGEX),
+    },
+    source_key_hk: {
+        metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_hk_performance,
+                                                    r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT),
+        metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_hk_sustainability,
+                                                    r"sal-sustainability__score sal-sustainability__score--(\d)", MetricMatchMethod.REGEX),
+    }
 }
 
 morningstar_page_url_uk = {
-    'Overview': {"url": "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id", "timeout": 1},
+    'Overview': {"url": "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",
+                 "timeout": 1},
     # 'Portfolio': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=3",
     # 'Performance': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=1",
     # 'RiskAndRating': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=2",
     # 'Sustainability': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=6",
-    'SustainabilitySAL': {"url":"https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB", "timeout": 15},
+    'SustainabilitySAL': {
+        "url": "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
+        "timeout": 15},
 }
 
 morningstar_page_check_word_uk = {
@@ -47,7 +107,9 @@ morningstar_page_check_word_uk = {
 hk_lang_suffix_zh = "&lang=en-HK"
 
 morningstar_page_url_hk = {
-    'Sustainability': {"url":"https://www.morningstar.hk/hk/report/fund/sustainability.aspx?t=morningstar_id&fundservcode=&lang=en-HK", "timeout": 15},
+    'Sustainability': {
+        "url": "https://www.morningstar.hk/hk/report/fund/sustainability.aspx?t=morningstar_id&fundservcode=&lang=en-HK",
+        "timeout": 15},
 }
 
 morningstar_page_check_word_hk = {
