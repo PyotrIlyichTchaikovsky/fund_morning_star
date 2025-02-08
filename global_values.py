@@ -47,20 +47,16 @@ morningstar_page_uk_sustainability = MsPageTemplate(source_key_uk,
                                                     r"sal-component-sustainability-title",
                                                     15)
 
-morningstar_page_hk_performance = MsPageTemplate(source_key_uk,
+morningstar_page_hk_performance = MsPageTemplate(source_key_hk,
                                                  "Performance",
                                                  "https://www.morningstar.hk/hk/report/fund/performance.aspx?t=morningstar_id&fundservcode=&lang=en-HK",
                                                  r"sal-mip-quote__star-rating",
                                                  1)
-morningstar_page_hk_sustainability = MsPageTemplate(source_key_hk,
-                                                    "Sustainability",
-                                                    "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
-                                                    r"sal-component-sustainability-title",
-                                                    15)
+
 
 morningstar_page_template_dict = {
     source_key_uk: [morningstar_page_uk_overview, morningstar_page_uk_sustainability],
-    source_key_hk: [morningstar_page_hk_performance, morningstar_page_hk_sustainability]
+    source_key_hk: [morningstar_page_hk_performance, morningstar_page_uk_sustainability]
 }
 
 metric_key_star = "star"
@@ -81,7 +77,7 @@ morningstar_metric_dict: dict[str: dict[str: MsMetricTemplate]] = {
     source_key_hk: {
         metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_hk_performance,
                                                     r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT),
-        metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_hk_sustainability,
+        metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
                                                     r"sal-sustainability__score sal-sustainability__score--(\d)", MetricMatchMethod.REGEX),
     }
 }
