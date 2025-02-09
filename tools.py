@@ -33,7 +33,7 @@ def count_string_occurrences(file_path: str, target_string: str) -> int:
         print(f"读取文件时发生错误: {e}")
 
     if count == 0:
-        count = -1
+        count = -9
     return count
 
 
