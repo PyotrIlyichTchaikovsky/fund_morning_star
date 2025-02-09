@@ -1,16 +1,14 @@
+import concurrent.futures
 import os.path
-import time
 import pickle
-import re
 
 import pandas as pd
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 import global_values
-import tools
 from moring_star_logic import MsFundInfo, WebDriver
 
 
@@ -81,15 +79,34 @@ def get_morningstar_fund_list(excel_path: str) -> [MsFundInfo]:
 
 def collect_fund_pages(morningstar_fund_list: [MsFundInfo]):
     total_count = len(morningstar_fund_list)
+
+    # 并发执行本地检查操作
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # 提交所有任务，并将 Future 与任务在列表中的序号关联
+        future_to_index = {
+            executor.submit(morningstar_fund.check_disk_page_complete): index
+            for index, morningstar_fund in enumerate(morningstar_fund_list, start=1)
+        }
+        # 按任务完成的顺序处理结果（注意：打印的序号可能不再是顺序的）
+        for future in concurrent.futures.as_completed(future_to_index):
+            index = future_to_index[future]
+            try:
+                future.result()  # 如果任务中发生异常，这里会抛出
+            except Exception as exc:
+                print(f"*********本地检查: {index} / {total_count} 异常: {exc}******************")
+            else:
+                print(f"*********本地检查: {index} / {total_count}******************")
+
+    # 远程下载操作保持原来的顺序执行
     for index, morningstar_fund in enumerate(morningstar_fund_list, start=1):
         morningstar_fund.load_from_web_and_save_file()
-        print(f"*********processed: {index} / {total_count}******************")
+        print(f"*********远程下载: {index} / {total_count}******************")
 
     WebDriver().close_driver()
 
 
 # 主程序
-if __name__ == "__mainw__":
+if __name__ == "__main__":
     # 第一步：登录并保存 cookies
     login_to_morningstar(global_values.morningstar_url_head["UK"], global_values.cookie_path['UK'])
     login_to_morningstar(global_values.morningstar_url_head["HK"], global_values.cookie_path['HK'])

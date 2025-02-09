@@ -68,17 +68,17 @@ morningstar_metric_key_list = [metric_key_star, metric_key_medalist, metric_key_
 morningstar_metric_dict: dict[str: dict[str: MsMetricTemplate]] = {
     source_key_uk: {
         metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_uk_overview,
-                                          r"ating_sprite stars(\d)", MetricMatchMethod.REGEX),
+                                          r"ating_sprite stars(\d+)\b", MetricMatchMethod.REGEX),
         metric_key_medalist: MsMetricTemplate(metric_key_medalist, morningstar_page_uk_overview,
-                                              r"rating_sprite medalist-rating-(\d)", MetricMatchMethod.REGEX),
+                                              r"rating_sprite medalist-rating-(\d+)\b", MetricMatchMethod.REGEX),
         metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
-                                                    r"sal-sustainability__score sal-sustainability__score--(\d)", MetricMatchMethod.REGEX),
+                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b", MetricMatchMethod.REGEX),
     },
     source_key_hk: {
         metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_hk_performance,
                                                     r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT),
         metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
-                                                    r"sal-sustainability__score sal-sustainability__score--(\d)", MetricMatchMethod.REGEX),
+                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b", MetricMatchMethod.REGEX),
     }
 }
 

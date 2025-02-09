@@ -102,7 +102,8 @@ class MsPage:
         return
 
     def check_disk_complete(self) -> bool:
-        return tools.check_key_word_in_file(self.disk_path, self.page_template.completion_check_words)
+        self.load_complete = tools.check_key_word_in_file(self.disk_path, self.page_template.completion_check_words)
+        return self.load_complete
 
 
 class MsMetric:
@@ -115,7 +116,7 @@ class MsMetric:
     def get_metric_value(self):
         if self.metric_template.method == MetricMatchMethod.REGEX:
             match_rst = tools.filter_file_by_keyword(self.page.disk_path, self.metric_template.pick_words)
-            result_str = match_rst.group(0).strip()  # 去除首尾空白字符
+            result_str = match_rst.strip()  # 去除首尾空白字符
             try:
                 # 如果匹配的字符串不包含小数点，则尝试转换为 int，否则转换为 float
                 if '.' in result_str:
@@ -147,11 +148,20 @@ class MsFundInfo:
                 continue
             self.metric_dict[metric_name] = MsMetric(self.page_list, metric_dict[metric_name])
 
-    def load_from_web_and_save_file(self):
+    def check_disk_page_complete(self):
         print(f"开始处理：{self.morningstar_id}[{self.source}]")
         for page in self.page_list:
             print(f"\t开始处理：{self.morningstar_id} 页面：{page.page_template.page_name}[{page.page_template.source}]")
             if page.check_disk_complete():
+                print("\t本地内容完整，跳过")
+            else:
+                print("\t本地内容不完整，需要后续处理")
+
+    def load_from_web_and_save_file(self):
+        print(f"开始处理：{self.morningstar_id}[{self.source}]")
+        for page in self.page_list:
+            print(f"\t开始处理：{self.morningstar_id} 页面：{page.page_template.page_name}[{page.page_template.source}]")
+            if page.load_complete:
                 print("\t本地内容完整，跳过")
                 continue
             page.load_from_web(WebDriver().get_driver(page.page_template.source))
@@ -161,6 +171,7 @@ class MsFundInfo:
         ret_dict = {}
         for metric_name in global_values.morningstar_metric_key_list:
             if metric_name not in self.metric_dict:
-                ret_dict[metric_name] = -1
+                ret_dict[metric_name] = -9
             else:
                 ret_dict[metric_name] = self.metric_dict[metric_name].get_metric_value()
+        return ret_dict

@@ -184,18 +184,14 @@ def combine_excel_files(pdf_dir):
         if first_excel:
             # 保留第一个文件的表头
             headers = df.columns.tolist()  # 获取第一个文件的表头
-            headers.append("PDF")
-            data = df.values.tolist()
-            data_with_file_name = add_column_to_array(data, f"{os.path.splitext(excel_file)[0]}.pdf")
-            combined_data.append(data_with_file_name)  # 将第一个文件的数据加入合并数据中
+            headers.append("PDF")  # 将第一个文件的数据加入合并数据中
             print("已读取第一个文件的表头，准备合并后续数据。")
             first_excel = False
-        else:
-            # 后续文件跳过表头，只合并数据部分
-            data = df.iloc[1:].values.tolist()
-            data_with_file_name = add_column_to_array(data, f"{os.path.splitext(excel_file)[0]}.pdf")
-            combined_data.append(data_with_file_name)  # 跳过第一行表头，仅合并数据
-            print(f"已跳过文件 {excel_file} 的表头，合并数据部分。")
+
+        print(f"正在处理文件 {excel_file}")
+        data = df.values.tolist()
+        data_with_file_name = add_column_to_array(data, f"{os.path.splitext(excel_file)[0]}.pdf")
+        combined_data.append(data_with_file_name)
 
     # 将所有数据合并成一个大列表
     flat_combined_data = [row for sublist in combined_data for row in sublist]
@@ -242,6 +238,5 @@ def process_pdfs_and_combine(pdf_dir, pdf_excel_dir, isin_excel_path):
 
 
 if __name__ == "__main__":
-    # 使用示例
     process_pdfs_and_combine(global_values.hsbc_fund_pdfs_dir, global_values.hsbc_fund_pdfs_dir,
                              global_values.hsbc_isin_excel_path)

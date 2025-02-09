@@ -13,7 +13,7 @@ class ISINInfo:
     def add_bank(self, bank: str):
         self.bank_list.append(bank)
 
-    def back_str(self) -> str:
+    def bank_str(self) -> str:
         return "+".join(self.bank_list)
 
 
@@ -27,9 +27,11 @@ def load_morningstar_code(isin_list: dict[str: ISINInfo], out_excel_path):
     # 转换ISIN列为字符串类型
     df['ISIN'] = df['ISIN'].astype(str)
 
-    for isin_info in isin_list.values():
+    total_count = len(isin_list.values())
+    for index, isin_info in enumerate(isin_list.values(), start=1):
+        print(f"正在处理：[{index}/{total_count}]")
         isin = str(isin_info.isin_id).strip()
-        bank_info = isin_info.back_str()
+        bank_info = isin_info.bank_str()
 
         # ====== 条件检查逻辑 ======
         # 检查是否已有有效记录：已经存在了ISIN，并且MorningStarName和MorningStarID是有效的（不为空和Exception）

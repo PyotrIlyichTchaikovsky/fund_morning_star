@@ -7,8 +7,8 @@ def filter_file_by_keyword(file_path, keyword_pattern):
         for line in file:
             match = re.search(keyword_pattern, line)
             if match:
-                return match.group()
-    return None
+                return match.group(1)
+    return "-9"
 
 
 def count_string_occurrences(file_path: str, target_string: str) -> int:
@@ -32,6 +32,8 @@ def count_string_occurrences(file_path: str, target_string: str) -> int:
     except Exception as e:
         print(f"读取文件时发生错误: {e}")
 
+    if count == 0:
+        count = -1
     return count
 
 
