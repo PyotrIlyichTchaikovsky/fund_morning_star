@@ -12,53 +12,91 @@ import tools
 from base_define import MsPageTemplate, MsMetricTemplate, SingletonMeta, MetricMatchMethod
 
 
+def init_chrome(source: str):
+    """
+        批量查询基金页面并返回结构化的结果
+        """
+    # 设置 WebDriver（使用 Service 对象）
+    service = Service(ChromeDriverManager().install())  # 自动安装和获取 ChromeDriver
+
+    # 设置浏览器选项
+    chrome_options = Options()
+    chrome_options.add_argument("--start-maximized")  # 启动时最大化窗口
+
+    # 启动 Chrome 浏览器
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    """
+    使用保存的 cookies 查询基金页面并提取所需信息
+    """
+    # 打开 Morningstar 首页
+    driver.get(global_values.morningstar_url_head[source])
+
+    # 加载 cookies 并添加到浏览器会话中
+    with open(global_values.cookie_path[source], "rb") as cookies_file:
+        cookies = pickle.load(cookies_file)
+        for cookie in cookies:
+            driver.add_cookie(cookie)  # 添加每个 cookie
+
+    # 刷新页面，确保 cookies 被正确应用
+    driver.refresh()
+
+    return driver
+
+
+def login_to_morningstar(source: str):
+    login_url = global_values.morningstar_url_head[source]
+    cookie_path = global_values.cookie_path[source]
+    if os.path.exists(cookie_path):
+        print(f"cookie 已存在{cookie_path}，跳过登录")
+        return
+
+    """
+    手动登录Morningstar并保存登录状态（cookies）
+    """
+    # 设置 WebDriver（使用 Service 对象）
+    service = Service(ChromeDriverManager().install())  # 自动安装和获取 ChromeDriver
+
+    # 设置浏览器选项
+    chrome_options = Options()
+    chrome_options.add_argument("--start-maximized")  # 启动时最大化窗口
+
+    # 启动 Chrome 浏览器
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    # 打开页面，手动登录
+    driver.get(login_url)  # 打开 Morningstar 首页
+
+    # 让你手动登录并保持会话状态
+    print("请手动登录网站并保持登录状态。登录完成后，请按回车继续...")
+    input("按回车继续...")  # 等待你手动登录完成
+
+    # 获取登录后的 cookies
+    cookies = driver.get_cookies()
+
+    # 将 cookies 保存到文件中
+    with open(cookie_path, "wb") as cookies_file:
+        pickle.dump(cookies, cookies_file)
+
+    # 关闭浏览器
+    driver.quit()
+
+    print("登录成功，cookies 已保存。")
+
+
 class WebDriver(metaclass=SingletonMeta):
     def __init__(self):
         self.driver_dict = {}
 
     def get_driver(self, source: str):
         if source not in self.driver_dict:
-            self.driver_dict[source] = self.init_chrome(source)
+            self.driver_dict[source] = init_chrome(source)
 
         return self.driver_dict[source]
 
     def close_driver(self):
         for driver in self.driver_dict.values():
             driver.quit()
-
-    def init_chrome(self, source: str):
-        """
-            批量查询基金页面并返回结构化的结果
-            """
-        # 设置 WebDriver（使用 Service 对象）
-        service = Service(ChromeDriverManager().install())  # 自动安装和获取 ChromeDriver
-
-        # 设置浏览器选项
-        chrome_options = Options()
-        chrome_options.add_argument("--start-maximized")  # 启动时最大化窗口
-
-        # 启动 Chrome 浏览器
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-
-        """
-        使用保存的 cookies 查询基金页面并提取所需信息
-        """
-        # 打开 Morningstar 首页
-        driver.get(global_values.morningstar_url_head[source])
-
-        # 加载 cookies 并添加到浏览器会话中
-        with open(global_values.cookie_path[source], "rb") as cookies_file:
-            cookies = pickle.load(cookies_file)
-            for cookie in cookies:
-                driver.add_cookie(cookie)  # 添加每个 cookie
-
-        # 刷新页面，确保 cookies 被正确应用
-        driver.refresh()
-
-        return driver
-
-
-
 
 
 class MsPage:
@@ -71,8 +109,9 @@ class MsPage:
                                       morningstar_id + "/" + self.page_template.source + "/" + self.page_template.page_name + ".html"))
         self.load_complete = False
 
-    def load_from_web(self, driver):
+    def load_from_web(self):
         print(f"\t开始加载网页：{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
+        driver = WebDriver().get_driver(self.page_template.source)
         driver.get(self.web_url_path)
 
         self.load_complete = False
@@ -164,7 +203,7 @@ class MsFundInfo:
             if page.load_complete:
                 print("\t本地内容完整，跳过")
                 continue
-            page.load_from_web(WebDriver().get_driver(page.page_template.source))
+            page.load_from_web()
             page.save_to_disk()
 
     def load_from_disk_and_parse(self) -> dict[str: int]:

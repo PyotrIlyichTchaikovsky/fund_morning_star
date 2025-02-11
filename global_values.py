@@ -1,7 +1,6 @@
 import os
 
-from base_define import MsMetricTemplate, MetricMatchMethod
-from moring_star_logic import MsPageTemplate
+from base_define import MsMetricTemplate, MetricMatchMethod, MsPageTemplate
 
 base_dir = r"files"
 
