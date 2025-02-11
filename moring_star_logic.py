@@ -5,6 +5,9 @@ import pickle
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 import global_values
@@ -123,7 +126,7 @@ class MsPage:
 
             self.content = driver.page_source
 
-            if self.check_complete(self.content):
+            if self.page_template.completion_check_words in self.content:
                 print(f"\t网页数据加载完成！")
                 self.load_complete = True
                 break
@@ -133,16 +136,95 @@ class MsPage:
                 break
             time.sleep(1)  # 给页面一些时间来加载
 
-    def check_complete(self, content: str) -> bool:
-        return self.page_template.completion_check_words in content
-
     def save_to_disk(self):
-        tools.write_text_to_file(self.content, self.disk_path)
+        if self.load_complete:
+            tools.write_text_to_file(self.content, self.disk_path)
         return
 
     def check_disk_complete(self) -> bool:
-        self.load_complete = tools.check_key_word_in_file(self.disk_path, self.page_template.completion_check_words)
+        self.load_complete = tools.check_key_word_in_file(self.disk_path, [self.page_template.completion_check_words])
         return self.load_complete
+
+
+class MsComparePage(MsPage):
+    expected_titles = {
+        ".ec-section__toggle.ec-section__toggle--risk-and-rating.mds-button.mds-button--small": "Tracking error (3yr)",
+        ".ec-section__toggle.ec-section__toggle--fees-and-expenses.mds-button.mds-button--small": "Total Return After Fees",
+        ".ec-section__toggle.ec-section__toggle--portfolio.mds-button.mds-button--small": ">30 Years",
+        ".ec-section__toggle.ec-section__toggle--performance.mds-button.mds-button--small": "10 Years (ann)",
+    }
+
+    def load_from_web(self):
+        print(f"\t自定义逻辑加载网页：{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
+        driver = WebDriver().get_driver(self.page_template.source)
+        driver.get(self.web_url_path)
+        driver.refresh()
+
+        invalid_page = False
+        # 使用 WebDriverWait 等待 span 元素加载完成，最多等待 10 秒
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_all_elements_located(
+                    (By.CSS_SELECTOR, "span.ec-key-value-pair__field-value.ec-key-value-pair__field-value--isin"))
+            )
+        except Exception as e:
+            print(f"未能找到对应的基金，错误: {e}")
+            invalid_page = True
+
+
+        if invalid_page:
+            self.load_complete = False
+            return
+
+        # 循环点击每个按钮
+        for button_class, expected_title in MsComparePage.expected_titles.items():
+            try:
+                time.sleep(1)
+                button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, button_class))
+                )
+                #print(driver.page_source)
+                #print(f"点击{button_class}1")
+                button.click()
+                #print(f"点击{button_class}2")
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f"td[data-title='{expected_title}']"))
+                )
+            except Exception as e:
+                print(f"无法点击按钮 {button_class}，错误: {e}")
+                invalid_page = True
+                break
+
+        #driver.execute_script("window.scrollTo(0, 0);")
+
+        if invalid_page:
+            self.load_complete = False
+            return
+
+        # 获取页面源代码
+        self.content = driver.page_source
+        self.load_complete = True
+
+    def check_disk_complete(self) -> bool:
+        check_words_list:[str] = []
+        for title in MsComparePage.expected_titles.values():
+            check_words_list.append("data-title=\"" + title + "\"")
+        self.load_complete = tools.check_key_word_in_file(self.disk_path, check_words_list)
+        return self.load_complete
+
+class MsPageFactory:
+    @staticmethod
+    def create_page(morningstar_id, page_template: MsPageTemplate) -> MsPage:
+        # 定义一个字典来映射 page_name 到对应的类
+        special_page_classes = {
+            "Compare": MsComparePage,
+        }
+
+        page_class = special_page_classes.get(page_template.page_name)
+        if page_class:
+            return page_class(morningstar_id, page_template)
+        else:
+            return MsPage(morningstar_id, page_template)
 
 
 class MsMetric:
@@ -179,7 +261,7 @@ class MsFundInfo:
 
         self.page_list: [MsPage] = []
         for page_template in page_template_list:
-            self.page_list.append(MsPage(morningstar_id, page_template))
+            self.page_list.append(MsPageFactory.create_page(morningstar_id, page_template))
 
         self.metric_dict: dict[str: MsPage] = {}
         for metric_name in global_values.morningstar_metric_key_list:

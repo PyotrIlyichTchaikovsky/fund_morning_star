@@ -34,6 +34,12 @@ cookie_path = {
     source_key_hk: "files/cookies/cookies_hk.pkl"
 }
 
+morningstar_page_uk_compare = MsPageTemplate(source_key_uk,
+                                              "Compare",
+                                              "https://www.morningstar.co.uk/uk/compare/investment.aspx#?idType=msid&securityIds=morningstar_id",
+                                              r"",
+                                              1)
+
 morningstar_page_uk_overview = MsPageTemplate(source_key_uk,
                                               "Overview",
                                               "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",
@@ -54,7 +60,7 @@ morningstar_page_hk_performance = MsPageTemplate(source_key_hk,
 
 
 morningstar_page_template_dict = {
-    source_key_uk: [morningstar_page_uk_overview, morningstar_page_uk_sustainability],
+    source_key_uk: [morningstar_page_uk_compare, morningstar_page_uk_overview, morningstar_page_uk_sustainability],
     source_key_hk: [morningstar_page_hk_performance, morningstar_page_uk_sustainability]
 }
 

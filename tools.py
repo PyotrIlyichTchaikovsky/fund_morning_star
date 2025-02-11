@@ -53,12 +53,26 @@ def write_text_to_file(text, file_path):
         print(f"写入文件时发生错误: {e}")
 
 
-def check_key_word_in_file(file_path: str, check_words: str) -> bool:
+def check_key_word_in_file(file_path: str, check_words_list: [str]) -> bool:
     if not os.path.exists(file_path):
         return False
 
+    complete_list: [str] = []
+
     with open(file_path, 'r', encoding='utf-8') as file:  # 显式指定编码为utf-8
         for line in file:
-            if check_words in line:
+            check_words_list = [check_words for check_words in check_words_list if check_words not in line]
+
+            if len(check_words_list) == 0:
                 return True
+
     return False
+
+# 正则表达式：将换行符、制表符和多个空格替换成一个空格
+def clean_span_content(content):
+    # 替换换行符和制表符为空格
+    content = re.sub(r'[\n\t\r]+', ' ', content)
+    # 替换多个空格为一个空格
+    content = re.sub(r'\s+', ' ', content)
+    # 去除前后多余的空格
+    return content.strip()
