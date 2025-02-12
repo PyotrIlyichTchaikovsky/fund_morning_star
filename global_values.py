@@ -1,6 +1,6 @@
 import os
 
-from base_define import MsMetricTemplate, MetricMatchMethod, MsPageTemplate
+from base_define import MsMetricTemplate, MetricMatchMethod, MsPageTemplate, MsMetricKey
 
 base_dir = r"files"
 
@@ -34,6 +34,12 @@ cookie_path = {
     source_key_hk: "files/cookies/cookies_hk.pkl"
 }
 
+metric_star_uk = MsMetricKey("star", r"ating_sprite stars(\d+)\b", MetricMatchMethod.REGEX)
+metric_star_hk = MsMetricKey("star", r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT)
+metric_medalist = MsMetricKey("medalist", r"rating_sprite medalist-rating-(\d+)\b", MetricMatchMethod.REGEX)
+metric_sustainability = MsMetricKey("sustainability", r"sal-sustainability__score sal-sustainability__score--(\d+)\b", MetricMatchMethod.REGEX)
+
+
 morningstar_page_uk_compare = MsPageTemplate(source_key_uk,
                                              "Compare",
                                              "https://www.morningstar.co.uk/uk/compare/investment.aspx#?idType=msid&securityIds=morningstar_id",
@@ -44,19 +50,19 @@ morningstar_page_uk_overview = MsPageTemplate(source_key_uk,
                                               "Overview",
                                               "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",
                                               r"snapshotTextColor snapshotTextFontStyle snapshotTitleTable",
-                                              1)
+                                              1).add_metric_key(metric_star_uk).add_metric_key(metric_medalist)
 
 morningstar_page_uk_sustainability = MsPageTemplate(source_key_uk,
                                                     "SustainabilitySAL",
                                                     "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
                                                     r"sal-component-sustainability-title",
-                                                    15)
+                                                    15).add_metric_key(metric_sustainability)
 
 morningstar_page_hk_performance = MsPageTemplate(source_key_hk,
                                                  "Performance",
                                                  "https://www.morningstar.hk/hk/report/fund/performance.aspx?t=morningstar_id&fundservcode=&lang=en-HK",
                                                  r"sal-mip-quote__star-rating",
-                                                 1)
+                                                 1).add_metric_key(metric_star_hk)
 
 morningstar_page_template_dict = {
     source_key_uk: [morningstar_page_uk_compare, morningstar_page_uk_overview, morningstar_page_uk_sustainability],

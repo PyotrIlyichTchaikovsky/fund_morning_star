@@ -14,7 +14,7 @@ def filter_file_by_keyword(file_path, keyword_pattern):
     return "-9"
 
 
-def count_string_occurrences(file_path: str, target_string: str) -> int:
+def count_keyword(file_path: str, target_string: str) -> str:
     """
     计算文件中指定字符串出现的次数（UTF-8 编码）。
 
@@ -37,7 +37,7 @@ def count_string_occurrences(file_path: str, target_string: str) -> int:
 
     if count == 0:
         count = -9
-    return count
+    return str(count)
 
 
 def write_text_to_file(text, file_path):
@@ -68,6 +68,7 @@ def check_key_word_in_file(file_path: str, check_words_list: [str]) -> bool:
                 return True
 
     return False
+
 
 # 正则表达式：将换行符、制表符和多个空格替换成一个空格
 def clean_span_content(content):
@@ -148,3 +149,27 @@ def format_columns_as_percentage(file_path, percentage_columns):
     # Save the updated Excel file
     workbook.save(file_path)
     print(f"Formatted specified columns as percentage in {file_path}.")
+
+
+def check_excel_for_keys(excel_path, col_name, required_keys):
+    # 检查Excel文件是否存在，并且包含某些特定的key
+    if not os.path.exists(excel_path):
+        return False
+
+    try:
+        # 读取Excel文件
+        df = pd.read_excel(excel_path)
+        # 获取Excel中的所有Metric列
+        metrics = df[col_name].tolist()
+
+        # 检查是否包含所有的特定keys
+        missing_keys = [key for key in required_keys if key not in metrics]
+
+        if missing_keys:
+            print(f"Missing keys: {', '.join(missing_keys)}")
+            return False
+        else:
+            return True
+    except Exception as e:
+        print(f"Error reading the Excel file: {e}")
+        return False

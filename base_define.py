@@ -1,4 +1,21 @@
+from __future__ import annotations  # 自动处理前向引用
+
 from enum import Enum
+
+
+class MetricMatchMethod(Enum):
+    REGEX = 1
+    COUNT = 2
+    TD_DEV = 3
+
+
+class MsMetricKey:
+    def __init__(self, metric_name: str, pick_words: str, method: MetricMatchMethod):
+        self.metric_name = metric_name
+        self.pick_words = pick_words
+        self.method = method
+
+
 
 class MsPageTemplate:
     def __init__(self, source: str, page_name: str, page_url_template: str, completion_check_words: str,
@@ -8,12 +25,11 @@ class MsPageTemplate:
         self.page_url_template: str = page_url_template
         self.completion_check_words: str = completion_check_words
         self.try_count: int = try_count
+        self.metric_key_list: list[MsMetricKey] = []
 
-
-class MetricMatchMethod(Enum):
-    REGEX = 1
-    COUNT = 2
-    TD_DEV = 3
+    def add_metric_key(self, metric: MsMetricKey) -> MsPageTemplate:
+        self.metric_key_list.append(metric)
+        return self
 
 
 class MsMetricTemplate:

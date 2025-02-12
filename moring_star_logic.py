@@ -109,26 +109,79 @@ class MsPage:
         self.page_template: MsPageTemplate = page_template
         self.morningstar_id: str = morningstar_id
         self.web_url_path: str = self.page_template.page_url_template.replace('morningstar_id', morningstar_id)
-        self.disk_path: str = str(os.path.join(global_values.morningstar_page_source_dir,
-                                      morningstar_id + "/" + self.page_template.source + "/" + self.page_template.page_name + ".html"))
+        file_path = os.path.join(global_values.morningstar_page_source_dir,
+                                 morningstar_id + "/" + self.page_template.source + "/" + self.page_template.page_name)
+        self.html_disk_path: str = str(file_path + ".html")
+        self.metric_disk_path: str = str(file_path + ".xlsx")
         self.html_file_complete = False
+        self.metric_file_complete = False
         self.metric_dict: dict[str: any] = {}
 
+    def check_disk_complete(self):
+        pass
+
     def load_from_web_and_save(self):
+        html_text: str = ""
+        if not self.html_file_complete:
+            html_text = self.get_html_from_web()
+
+        if not self.metric_file_complete:
+            if html_text == "":
+                html_text = tools.read_from_file(self.html_disk_path)
+            if html_text != "":
+                self.save_metrics(html_text)
+
+    def get_html_from_web(self) -> str:
+        pass
+
+    def save_metrics(self, html_text: str):
+        pass
+
+    def get_metric(self, metric_name: str) -> any:
+        if metric_name not in self.metric_dict:
+            return None
+        return self.metric_dict[metric_name]
+
+    def load_metrics(self):
+        # 从Excel文件读取内容
+        try:
+            df = pd.read_excel(self.metric_disk_path)
+            # 将读取的Excel内容转化为字典
+            self.metric_dict = dict(zip(df['Metric'], df['Value']))
+        except FileNotFoundError:
+            print(f"Error: The file {self.metric_disk_path} does not exist.")
+            return None
+        except Exception as e:
+            print(f"Error reading the Excel file: {e}")
+            return None
+
+
+class MsCommonPage(MsPage):
+    def __init__(self, morningstar_id: str, page_template: MsPageTemplate):
+        # 调用父类的构造方法
+        super().__init__(morningstar_id, page_template)  # 传递父类所需的参数
+
+    def check_disk_complete(self):
+        self.html_file_complete = tools.check_key_word_in_file(self.html_disk_path,
+                                                               [self.page_template.completion_check_words])
+        keys: list[str] = [metric_key.metric_name for metric_key in self.page_template.metric_key_list]
+        self.metric_file_complete = tools.check_excel_for_keys(self.metric_disk_path, "Metric", keys)
+
+    def get_html_from_web(self) -> str:
         if self.html_file_complete:
             print("\t本地内容完整，跳过")
-            return
+            return ""
 
         print(f"\t开始加载网页：{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
         driver = WebDriver().get_driver(self.page_template.source)
         driver.get(self.web_url_path)
 
-
         check_count = 0
         load_success = False
         while True:
             check_count += 1
-            print(f"\t检查网页是否加载完成：[{check_count}]{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
+            print(
+                f"\t检查网页是否加载完成：[{check_count}]{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
 
             page_content = driver.page_source
             if self.page_template.completion_check_words in page_content:
@@ -141,24 +194,27 @@ class MsPage:
                 break
             time.sleep(1)  # 给页面一些时间来加载
 
-
         if load_success:
-            print(f"\t文件写入:{self.disk_path}")
-            tools.write_text_to_file(page_content, self.disk_path)
+            print(f"\t文件写入:{self.html_disk_path}")
+            tools.write_text_to_file(page_content, self.html_disk_path)
+            return page_content
+        else:
+            return ""
 
+    def save_metrics(self, html_text: str):
+        metric_dict: dict[str, str] = {}
+        for metric_key in self.page_template.metric_key_list:
+            if metric_key.method == MetricMatchMethod.REGEX:
+                match_rst = tools.filter_file_by_keyword(self.html_disk_path, metric_key.pick_words)
+                result_str = match_rst.strip()  # 去除首尾空白字符
+                metric_dict[metric_key.metric_name] = result_str
+            elif metric_key.method == MetricMatchMethod.COUNT:
+                metric_dict[metric_key.metric_name] = tools.count_keyword(self.html_disk_path, metric_key.pick_words)
 
-    def check_disk_complete(self) -> bool:
-        self.html_file_complete = tools.check_key_word_in_file(self.disk_path, [self.page_template.completion_check_words])
-        return self.html_file_complete
+        df = pd.DataFrame(list(metric_dict.items()), columns=['Metric', 'Value'])
+        df.to_excel(self.metric_disk_path, index=False)
+        print(f"\tmetric新内容保存在：{self.metric_disk_path}")
 
-
-    def get_metric(self, metric_name: str) -> any:
-        if metric_name not in self.metric_dict:
-            return None
-        return self.metric_dict[metric_name]
-
-    def load_metrics(self):
-        pass
 
 class MsComparePage(MsPage):
     expected_titles = {
@@ -171,19 +227,16 @@ class MsComparePage(MsPage):
     def __init__(self, morningstar_id: str, page_template: MsPageTemplate):
         # 调用父类的构造方法
         super().__init__(morningstar_id, page_template)  # 传递父类所需的参数
-        self.metric_path: str = str(os.path.join(global_values.morningstar_page_source_dir,
-                                               morningstar_id + "/" + self.page_template.source + "/" + self.page_template.page_name + ".xlsx"))
-        self.metric_complete = False
 
-    def load_from_web_and_save(self):
-        content = self.load_from_web()
-        self.save_metrics(content)
+    def check_disk_complete(self):
+        check_words_list: [str] = []
+        for title in MsComparePage.expected_titles.values():
+            check_words_list.append("data-title=\"" + title + "\"")
+        self.html_file_complete = tools.check_key_word_in_file(self.html_disk_path, check_words_list)
+        self.metric_file_complete = tools.check_excel_for_keys(self.metric_disk_path, "Metric",
+                                                               MsComparePage.expected_titles.values())
 
-    def load_from_web(self) -> str:
-        if self.html_file_complete:
-            print("\t本地内容完整，跳过")
-            return ""
-
+    def get_html_from_web(self) -> str:
         print(f"\t自定义逻辑加载网页：{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
         driver = WebDriver().get_driver(self.page_template.source)
         driver.get(self.web_url_path)
@@ -199,7 +252,6 @@ class MsComparePage(MsPage):
         except Exception as e:
             print(f"\t未能找到对应的基金，错误: {e}")
             invalid_page = True
-
 
         if invalid_page:
             return ""
@@ -225,26 +277,11 @@ class MsComparePage(MsPage):
         content = driver.page_source
 
         # 获取页面源代码
-        tools.write_text_to_file(content, self.disk_path)
+        tools.write_text_to_file(content, self.html_disk_path)
         return content
 
-
-    def check_disk_complete(self):
-        check_words_list:[str] = []
-        for title in MsComparePage.expected_titles.values():
-            check_words_list.append("data-title=\"" + title + "\"")
-        self.html_file_complete = tools.check_key_word_in_file(self.disk_path, check_words_list)
-        self.metric_complete = self.check_excel_for_keys(MsComparePage.expected_titles.values())
-
-
     def save_metrics(self, content: str) -> None:
-        if self.metric_complete:
-            print(f"\t本地{self.metric_path}完整，跳过")
-            return
-
         if content == "":
-            content = self.load_from_disk()
-        if content is None or content == "":
             return
 
         metric_dict: dict[str, any] = {}
@@ -270,49 +307,8 @@ class MsComparePage(MsPage):
 
         # 将metric_dict写入到Excel文件
         df = pd.DataFrame(list(metric_dict.items()), columns=['Metric', 'Value'])
-        df.to_excel(self.metric_path, index=False)
-        print(f"\tmetric新内容保存在：{self.metric_path}")
-
-    def load_metrics(self):
-        # 从Excel文件读取内容
-        try:
-            df = pd.read_excel(self.metric_path)
-            # 将读取的Excel内容转化为字典
-            self.metric_dict = dict(zip(df['Metric'], df['Value']))
-        except FileNotFoundError:
-            print(f"Error: The file {self.metric_path} does not exist.")
-            return None
-        except Exception as e:
-            print(f"Error reading the Excel file: {e}")
-            return None
-
-    def check_excel_for_keys(self, required_keys):
-        # 检查Excel文件是否存在，并且包含某些特定的key
-        if not os.path.exists(self.metric_path):
-            print(f"Error: The file {self.metric_path} does not exist.")
-            return False
-
-        try:
-            # 读取Excel文件
-            df = pd.read_excel(self.metric_path)
-            # 获取Excel中的所有Metric列
-            metrics = df['Metric'].tolist()
-
-            # 检查是否包含所有的特定keys
-            missing_keys = [key for key in required_keys if key not in metrics]
-
-            if missing_keys:
-                print(f"Missing keys: {', '.join(missing_keys)}")
-                return False
-            else:
-                print("All required keys are present.")
-                return True
-        except Exception as e:
-            print(f"Error reading the Excel file: {e}")
-            return False
-
-    def load_from_disk(self) -> str:
-        return tools.read_from_file(self.disk_path)
+        df.to_excel(self.metric_disk_path, index=False)
+        print(f"\tmetric新内容保存在：{self.metric_disk_path}")
 
 
 class MsPageFactory:
@@ -327,7 +323,7 @@ class MsPageFactory:
         if page_class:
             return page_class(morningstar_id, page_template)
         else:
-            return MsPage(morningstar_id, page_template)
+            return MsCommonPage(morningstar_id, page_template)
 
 
 class MsMetric:
@@ -339,7 +335,7 @@ class MsMetric:
 
     def get_metric_value(self):
         if self.metric_template.method == MetricMatchMethod.REGEX:
-            match_rst = tools.filter_file_by_keyword(self.page.disk_path, self.metric_template.pick_words)
+            match_rst = tools.filter_file_by_keyword(self.page.html_disk_path, self.metric_template.pick_words)
             result_str = match_rst.strip()  # 去除首尾空白字符
             try:
                 # 如果匹配的字符串不包含小数点，则尝试转换为 int，否则转换为 float
@@ -351,11 +347,10 @@ class MsMetric:
                 raise ValueError(f"匹配结果无法转换为数字：{result_str}") from e
             return value
         elif self.metric_template.method == MetricMatchMethod.COUNT:
-            return tools.count_string_occurrences(self.page.disk_path, self.metric_template.pick_words)
+            return tools.count_keyword(self.page.html_disk_path, self.metric_template.pick_words)
         elif self.metric_template.method == MetricMatchMethod.TD_DEV:
             self.page.load_metrics()
             return self.page.get_metric(self.metric_template.pick_words)
-
 
 
 class MsFundInfo:
