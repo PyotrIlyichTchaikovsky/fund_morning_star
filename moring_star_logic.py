@@ -2,6 +2,8 @@ import os
 import time
 import pickle
 
+import pandas as pd
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -103,32 +105,35 @@ class WebDriver(metaclass=SingletonMeta):
 
 
 class MsPage:
-    def __init__(self, morningstar_id, page_template: MsPageTemplate):
+    def __init__(self, morningstar_id: str, page_template: MsPageTemplate):
         self.page_template: MsPageTemplate = page_template
-        self.content: str = ""
         self.morningstar_id: str = morningstar_id
         self.web_url_path: str = self.page_template.page_url_template.replace('morningstar_id', morningstar_id)
         self.disk_path: str = str(os.path.join(global_values.morningstar_page_source_dir,
                                       morningstar_id + "/" + self.page_template.source + "/" + self.page_template.page_name + ".html"))
-        self.load_complete = False
+        self.html_file_complete = False
+        self.metric_dict: dict[str: any] = {}
 
-    def load_from_web(self):
+    def load_from_web_and_save(self):
+        if self.html_file_complete:
+            print("\t本地内容完整，跳过")
+            return
+
         print(f"\t开始加载网页：{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
         driver = WebDriver().get_driver(self.page_template.source)
         driver.get(self.web_url_path)
 
-        self.load_complete = False
+
         check_count = 0
+        load_success = False
         while True:
             check_count += 1
-            print(
-                f"\t检查网页是否加载完成：[{check_count}]{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
+            print(f"\t检查网页是否加载完成：[{check_count}]{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
 
-            self.content = driver.page_source
-
-            if self.page_template.completion_check_words in self.content:
+            page_content = driver.page_source
+            if self.page_template.completion_check_words in page_content:
+                load_success = True
                 print(f"\t网页数据加载完成！")
-                self.load_complete = True
                 break
 
             if check_count > self.page_template.try_count:  # timeout直接跳出
@@ -136,15 +141,24 @@ class MsPage:
                 break
             time.sleep(1)  # 给页面一些时间来加载
 
-    def save_to_disk(self):
-        if self.load_complete:
-            tools.write_text_to_file(self.content, self.disk_path)
-        return
+
+        if load_success:
+            print(f"\t文件写入:{self.disk_path}")
+            tools.write_text_to_file(page_content, self.disk_path)
+
 
     def check_disk_complete(self) -> bool:
-        self.load_complete = tools.check_key_word_in_file(self.disk_path, [self.page_template.completion_check_words])
-        return self.load_complete
+        self.html_file_complete = tools.check_key_word_in_file(self.disk_path, [self.page_template.completion_check_words])
+        return self.html_file_complete
 
+
+    def get_metric(self, metric_name: str) -> any:
+        if metric_name not in self.metric_dict:
+            return None
+        return self.metric_dict[metric_name]
+
+    def load_metrics(self):
+        pass
 
 class MsComparePage(MsPage):
     expected_titles = {
@@ -154,7 +168,22 @@ class MsComparePage(MsPage):
         ".ec-section__toggle.ec-section__toggle--performance.mds-button.mds-button--small": "10 Years (ann)",
     }
 
-    def load_from_web(self):
+    def __init__(self, morningstar_id: str, page_template: MsPageTemplate):
+        # 调用父类的构造方法
+        super().__init__(morningstar_id, page_template)  # 传递父类所需的参数
+        self.metric_path: str = str(os.path.join(global_values.morningstar_page_source_dir,
+                                               morningstar_id + "/" + self.page_template.source + "/" + self.page_template.page_name + ".xlsx"))
+        self.metric_complete = False
+
+    def load_from_web_and_save(self):
+        content = self.load_from_web()
+        self.save_metrics(content)
+
+    def load_from_web(self) -> str:
+        if self.html_file_complete:
+            print("\t本地内容完整，跳过")
+            return ""
+
         print(f"\t自定义逻辑加载网页：{self.morningstar_id}-{self.page_template.page_name}: {self.web_url_path}")
         driver = WebDriver().get_driver(self.page_template.source)
         driver.get(self.web_url_path)
@@ -168,49 +197,123 @@ class MsComparePage(MsPage):
                     (By.CSS_SELECTOR, "span.ec-key-value-pair__field-value.ec-key-value-pair__field-value--isin"))
             )
         except Exception as e:
-            print(f"未能找到对应的基金，错误: {e}")
+            print(f"\t未能找到对应的基金，错误: {e}")
             invalid_page = True
 
 
         if invalid_page:
-            self.load_complete = False
-            return
+            return ""
 
         # 循环点击每个按钮
         for button_class, expected_title in MsComparePage.expected_titles.items():
             try:
-                time.sleep(1)
                 button = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, button_class))
                 )
-                #print(driver.page_source)
-                #print(f"点击{button_class}1")
                 button.click()
-                #print(f"点击{button_class}2")
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f"td[data-title='{expected_title}']"))
                 )
             except Exception as e:
-                print(f"无法点击按钮 {button_class}，错误: {e}")
+                print(f"\t无法点击按钮 {button_class}，错误: {e}")
                 invalid_page = True
                 break
 
-        #driver.execute_script("window.scrollTo(0, 0);")
-
         if invalid_page:
-            self.load_complete = False
-            return
+            return ""
+
+        content = driver.page_source
 
         # 获取页面源代码
-        self.content = driver.page_source
-        self.load_complete = True
+        tools.write_text_to_file(content, self.disk_path)
+        return content
 
-    def check_disk_complete(self) -> bool:
+
+    def check_disk_complete(self):
         check_words_list:[str] = []
         for title in MsComparePage.expected_titles.values():
             check_words_list.append("data-title=\"" + title + "\"")
-        self.load_complete = tools.check_key_word_in_file(self.disk_path, check_words_list)
-        return self.load_complete
+        self.html_file_complete = tools.check_key_word_in_file(self.disk_path, check_words_list)
+        self.metric_complete = self.check_excel_for_keys(MsComparePage.expected_titles.values())
+
+
+    def save_metrics(self, content: str) -> None:
+        if self.metric_complete:
+            print(f"\t本地{self.metric_path}完整，跳过")
+            return
+
+        if content == "":
+            content = self.load_from_disk()
+        if content is None or content == "":
+            return
+
+        metric_dict: dict[str, any] = {}
+        soup = BeautifulSoup(content, 'html.parser')
+        # 找到所有的<td>标签
+        td_elements = soup.find_all('td')
+        # 提取data-title和div的title内容的对应关系
+        for idx, td in enumerate(td_elements):
+            data_title = td.get('data-title')
+            div = td.find('div')
+            if div:
+                # 首先尝试获取div的title属性
+                div_title = div.get('title')
+                # 如果div_title为空，则尝试获取div的文本内容
+                if not div_title:
+                    div_title = div.get_text(strip=True)
+
+                # 如果data_title为空，则将其修改为第几个key
+                if not data_title:
+                    data_title = f"key_{idx + 1}"
+
+                metric_dict[data_title] = div_title
+
+        # 将metric_dict写入到Excel文件
+        df = pd.DataFrame(list(metric_dict.items()), columns=['Metric', 'Value'])
+        df.to_excel(self.metric_path, index=False)
+        print(f"\tmetric新内容保存在：{self.metric_path}")
+
+    def load_metrics(self):
+        # 从Excel文件读取内容
+        try:
+            df = pd.read_excel(self.metric_path)
+            # 将读取的Excel内容转化为字典
+            self.metric_dict = dict(zip(df['Metric'], df['Value']))
+        except FileNotFoundError:
+            print(f"Error: The file {self.metric_path} does not exist.")
+            return None
+        except Exception as e:
+            print(f"Error reading the Excel file: {e}")
+            return None
+
+    def check_excel_for_keys(self, required_keys):
+        # 检查Excel文件是否存在，并且包含某些特定的key
+        if not os.path.exists(self.metric_path):
+            print(f"Error: The file {self.metric_path} does not exist.")
+            return False
+
+        try:
+            # 读取Excel文件
+            df = pd.read_excel(self.metric_path)
+            # 获取Excel中的所有Metric列
+            metrics = df['Metric'].tolist()
+
+            # 检查是否包含所有的特定keys
+            missing_keys = [key for key in required_keys if key not in metrics]
+
+            if missing_keys:
+                print(f"Missing keys: {', '.join(missing_keys)}")
+                return False
+            else:
+                print("All required keys are present.")
+                return True
+        except Exception as e:
+            print(f"Error reading the Excel file: {e}")
+            return False
+
+    def load_from_disk(self) -> str:
+        return tools.read_from_file(self.disk_path)
+
 
 class MsPageFactory:
     @staticmethod
@@ -247,8 +350,12 @@ class MsMetric:
             except ValueError as e:
                 raise ValueError(f"匹配结果无法转换为数字：{result_str}") from e
             return value
-        else:
+        elif self.metric_template.method == MetricMatchMethod.COUNT:
             return tools.count_string_occurrences(self.page.disk_path, self.metric_template.pick_words)
+        elif self.metric_template.method == MetricMatchMethod.TD_DEV:
+            self.page.load_metrics()
+            return self.page.get_metric(self.metric_template.pick_words)
+
 
 
 class MsFundInfo:
@@ -273,22 +380,16 @@ class MsFundInfo:
         print(f"开始处理：{self.morningstar_id}[{self.source}]")
         for page in self.page_list:
             print(f"\t开始处理：{self.morningstar_id} 页面：{page.page_template.page_name}[{page.page_template.source}]")
-            if page.check_disk_complete():
-                print("\t本地内容完整，跳过")
-            else:
-                print("\t本地内容不完整，需要后续处理")
+            page.check_disk_complete()
 
     def load_from_web_and_save_file(self):
         print(f"开始处理：{self.morningstar_id}[{self.source}]")
         for page in self.page_list:
             print(f"\t开始处理：{self.morningstar_id} 页面：{page.page_template.page_name}[{page.page_template.source}]")
-            if page.load_complete:
-                print("\t本地内容完整，跳过")
-                continue
-            page.load_from_web()
-            page.save_to_disk()
 
-    def load_from_disk_and_parse(self) -> dict[str: int]:
+            page.load_from_web_and_save()
+
+    def load_from_disk_and_parse(self) -> dict[str: any]:
         ret_dict = {}
         for metric_name in global_values.morningstar_metric_key_list:
             if metric_name not in self.metric_dict:

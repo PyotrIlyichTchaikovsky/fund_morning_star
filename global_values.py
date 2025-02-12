@@ -35,10 +35,10 @@ cookie_path = {
 }
 
 morningstar_page_uk_compare = MsPageTemplate(source_key_uk,
-                                              "Compare",
-                                              "https://www.morningstar.co.uk/uk/compare/investment.aspx#?idType=msid&securityIds=morningstar_id",
-                                              r"",
-                                              1)
+                                             "Compare",
+                                             "https://www.morningstar.co.uk/uk/compare/investment.aspx#?idType=msid&securityIds=morningstar_id",
+                                             r"",
+                                             1)
 
 morningstar_page_uk_overview = MsPageTemplate(source_key_uk,
                                               "Overview",
@@ -58,7 +58,6 @@ morningstar_page_hk_performance = MsPageTemplate(source_key_hk,
                                                  r"sal-mip-quote__star-rating",
                                                  1)
 
-
 morningstar_page_template_dict = {
     source_key_uk: [morningstar_page_uk_compare, morningstar_page_uk_overview, morningstar_page_uk_sustainability],
     source_key_hk: [morningstar_page_hk_performance, morningstar_page_uk_sustainability]
@@ -67,8 +66,21 @@ morningstar_page_template_dict = {
 metric_key_star = "star"
 metric_key_medalist = "medalist"
 metric_key_sustainability = "sustainability"
+metric_key_compare_page_list: [str] = [
+    "Total Assets",
+    "Category",
+    "1 Year (ann)",
+    "3 Years (ann)",
+    "5 Years (ann)",
+    "10 Years (ann)",
+    "Standard Deviation (3yr)",
+    "Total Return After Fees",
+    "Morningstar Return (Overall)",
+    "Morningstar Risk (Overall)",
+    "SRRI",
+]
 
-morningstar_metric_key_list = [metric_key_star, metric_key_medalist, metric_key_sustainability]
+morningstar_metric_key_list = [metric_key_star, metric_key_medalist, metric_key_sustainability] + metric_key_compare_page_list
 
 morningstar_metric_dict: dict[str: dict[str: MsMetricTemplate]] = {
     source_key_uk: {
@@ -77,15 +89,20 @@ morningstar_metric_dict: dict[str: dict[str: MsMetricTemplate]] = {
         metric_key_medalist: MsMetricTemplate(metric_key_medalist, morningstar_page_uk_overview,
                                               r"rating_sprite medalist-rating-(\d+)\b", MetricMatchMethod.REGEX),
         metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
-                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b", MetricMatchMethod.REGEX),
+                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b",
+                                                    MetricMatchMethod.REGEX),
     },
     source_key_hk: {
         metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_hk_performance,
-                                                    r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT),
+                                          r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT),
         metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
-                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b", MetricMatchMethod.REGEX),
+                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b",
+                                                    MetricMatchMethod.REGEX),
     }
 }
+
+for metric_name in metric_key_compare_page_list:
+    morningstar_metric_dict[source_key_uk][metric_name] = MsMetricTemplate(metric_name, morningstar_page_uk_compare, metric_name, MetricMatchMethod.TD_DEV)
 
 morningstar_page_url_uk = {
     'Overview': {"url": "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",

@@ -13,6 +13,7 @@ class MsPageTemplate:
 class MetricMatchMethod(Enum):
     REGEX = 1
     COUNT = 2
+    TD_DEV = 3
 
 
 class MsMetricTemplate:

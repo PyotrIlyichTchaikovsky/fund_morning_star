@@ -2,6 +2,7 @@ import pandas as pd
 
 import global_values
 import morningstar_2_save_fund_pages
+import tools
 from moring_star_logic import MsFundInfo
 
 
@@ -28,7 +29,7 @@ def add_to_excel(fund_info: MsFundInfo, df):
     for metric_name, metric_value in metric_dict.items():
         # Add a new column if score_cat does not exist, otherwise update the value
         col_name = metric_name  # Using the score category as the column name
-        df.at[row_index, col_name] = metric_value
+        df.at[row_index, col_name] = tools.try_convert_to_number(metric_value)
 
     # Save the changes back to the Excel file
     print(f"Data added for Morningstar ID {morningstar_id}.")
@@ -38,6 +39,12 @@ if __name__ == "__main__":
     path = global_values.morningstar_code_excel_path
     fund_list = morningstar_2_save_fund_pages.get_morningstar_fund_list(path)
     write_morningstar_excel(path, fund_list)
+    tools.format_columns_as_percentage(path, ["1 Year (ann)",
+                                              "3 Years (ann)",
+                                              "5 Years (ann)",
+                                              "10 Years (ann)",
+                                              "Standard Deviation (3yr)",
+                                              "Total Return After Fees"])
 
 
 
