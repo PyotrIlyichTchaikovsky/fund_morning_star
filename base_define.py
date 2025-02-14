@@ -1,20 +1,20 @@
 from __future__ import annotations  # 自动处理前向引用
 
 from enum import Enum
+from typing import List, Dict
 
 
 class MetricMatchMethod(Enum):
     REGEX = 1
     COUNT = 2
     TD_DEV = 3
+    DIV_2 =4
 
 
 class MsMetricKey:
-    def __init__(self, metric_name: str, pick_words: str, method: MetricMatchMethod):
+    def __init__(self, metric_name: str, page_template_dict: Dict[MsPageTemplate, str]):
         self.metric_name = metric_name
-        self.pick_words = pick_words
-        self.method = method
-
+        self.page_template_dict = page_template_dict
 
 
 class MsPageTemplate:
@@ -25,12 +25,13 @@ class MsPageTemplate:
         self.page_url_template: str = page_url_template
         self.completion_check_words: str = completion_check_words
         self.try_count: int = try_count
-        self.metric_key_list: list[MsMetricKey] = []
+        self.metric_key_dict: Dict[str, MsMetricKey] = {}
 
-    def add_metric_key(self, metric: MsMetricKey) -> MsPageTemplate:
-        self.metric_key_list.append(metric)
-        return self
-
+    def add_metric_key_list(self, metric_key: MsMetricKey):
+        metric_name = metric_key.page_template_dict[self]
+        if metric_name == "":
+            metric_name = metric_key.metric_name
+        self.metric_key_dict[metric_name] = metric_key
 
 class MsMetricTemplate:
     def __init__(self, metric_name: str, page_template: MsPageTemplate, pick_words: str, method: MetricMatchMethod):
@@ -51,3 +52,6 @@ class SingletonMeta(type):
             # 如果 cls 不在 _instances 字典中，则创建新实例
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]  # 返回已有实例
+
+
+

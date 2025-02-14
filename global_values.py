@@ -1,6 +1,9 @@
-import os
+from __future__ import annotations  # 自动处理前向引用
 
-from base_define import MsMetricTemplate, MetricMatchMethod, MsPageTemplate, MsMetricKey
+import os
+from typing import List
+
+from base_define import MetricMatchMethod, MsPageTemplate, MsMetricKey
 
 base_dir = r"files"
 
@@ -34,108 +37,62 @@ cookie_path = {
     source_key_hk: "files/cookies/cookies_hk.pkl"
 }
 
-metric_star_uk = MsMetricKey("star", r"ating_sprite stars(\d+)\b", MetricMatchMethod.REGEX)
-metric_star_hk = MsMetricKey("star", r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT)
-metric_medalist = MsMetricKey("medalist", r"rating_sprite medalist-rating-(\d+)\b", MetricMatchMethod.REGEX)
-metric_sustainability = MsMetricKey("sustainability", r"sal-sustainability__score sal-sustainability__score--(\d+)\b", MetricMatchMethod.REGEX)
 
-
-morningstar_page_uk_compare = MsPageTemplate(source_key_uk,
+ms_page_uk_compare = MsPageTemplate(source_key_uk,
                                              "Compare",
                                              "https://www.morningstar.co.uk/uk/compare/investment.aspx#?idType=msid&securityIds=morningstar_id",
                                              r"",
                                              1)
 
-morningstar_page_uk_overview = MsPageTemplate(source_key_uk,
+ms_page_uk_overview = MsPageTemplate(source_key_uk,
                                               "Overview",
                                               "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",
                                               r"snapshotTextColor snapshotTextFontStyle snapshotTitleTable",
-                                              1).add_metric_key(metric_star_uk).add_metric_key(metric_medalist)
+                                              1)
 
-morningstar_page_uk_sustainability = MsPageTemplate(source_key_uk,
+ms_page_uk_sustainability = MsPageTemplate(source_key_uk,
                                                     "SustainabilitySAL",
                                                     "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
                                                     r"sal-component-sustainability-title",
-                                                    15).add_metric_key(metric_sustainability)
+                                                    15)
 
-morningstar_page_hk_performance = MsPageTemplate(source_key_hk,
+ms_page_hk_performance = MsPageTemplate(source_key_hk,
                                                  "Performance",
                                                  "https://www.morningstar.hk/hk/report/fund/performance.aspx?t=morningstar_id&fundservcode=&lang=en-HK",
                                                  r"sal-mip-quote__star-rating",
-                                                 1).add_metric_key(metric_star_hk)
+                                                 1)
 
-morningstar_page_template_dict = {
-    source_key_uk: [morningstar_page_uk_compare, morningstar_page_uk_overview, morningstar_page_uk_sustainability],
-    source_key_hk: [morningstar_page_hk_performance, morningstar_page_uk_sustainability]
-}
+ms_page_hk_search = MsPageTemplate(source_key_hk,
+                                   "HKSearch",
+                                   "https://www.morningstar.hk/hk/screener/fund.aspx#?filtersSelectedValue=%7B%22term%22:%22morningstar_id%22%7D&sortField=legalName&sortOrder=asc",
+                                   r"ec-table-combined-key-field__name ng-scope", 1
+                                   )
 
-metric_key_star = "star"
-metric_key_medalist = "medalist"
-metric_key_sustainability = "sustainability"
-metric_key_compare_page_list: [str] = [
-    "Total Assets",
-    "Category",
-    "1 Year (ann)",
-    "3 Years (ann)",
-    "5 Years (ann)",
-    "10 Years (ann)",
-    "Standard Deviation (3yr)",
-    "Total Return After Fees",
-    "Morningstar Return (Overall)",
-    "Morningstar Risk (Overall)",
-    "SRRI",
+metric_key_list: List[MsMetricKey] = [
+    MsMetricKey("star", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Rating™"}),
+    MsMetricKey("medalist", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Medalist Rating™"}),
+    MsMetricKey("sustainability", {ms_page_uk_sustainability: "", ms_page_hk_search: "Morningstar Sustainability Rating™"}),
+
+    MsMetricKey("Total Assets", {ms_page_uk_compare: "", ms_page_hk_search: "Fund Size (Mil)"}),
+    MsMetricKey("Category", {ms_page_uk_compare: "", ms_page_hk_search: "Morningstar Category"}),
+    MsMetricKey("1 Year (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "1 Year Annualised (%)"}),
+    MsMetricKey("3 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Years Annualised (%)"}),
+    MsMetricKey("5 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "5 Years Annualised (%)"}),
+    MsMetricKey("10 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "10 Years Annualised (%)"}),
+    MsMetricKey("Standard Deviation (3yr)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Year Standard Deviation"}),
+    MsMetricKey("Total Return After Fees", {ms_page_uk_compare: ""}),
+    MsMetricKey("Morningstar Return (Overall)", {ms_page_uk_compare: ""}),
+    MsMetricKey("Morningstar Risk (Overall)", {ms_page_uk_compare: ""}),
 ]
 
-morningstar_metric_key_list = [metric_key_star, metric_key_medalist, metric_key_sustainability] + metric_key_compare_page_list
 
-morningstar_metric_dict: dict[str: dict[str: MsMetricTemplate]] = {
-    source_key_uk: {
-        metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_uk_overview,
-                                          r"ating_sprite stars(\d+)\b", MetricMatchMethod.REGEX),
-        metric_key_medalist: MsMetricTemplate(metric_key_medalist, morningstar_page_uk_overview,
-                                              r"rating_sprite medalist-rating-(\d+)\b", MetricMatchMethod.REGEX),
-        metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
-                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b",
-                                                    MetricMatchMethod.REGEX),
-    },
-    source_key_hk: {
-        metric_key_star: MsMetricTemplate(metric_key_star, morningstar_page_hk_performance,
-                                          r"mds-icon__sal ip-star-rating", MetricMatchMethod.COUNT),
-        metric_key_sustainability: MsMetricTemplate(metric_key_sustainability, morningstar_page_uk_sustainability,
-                                                    r"sal-sustainability__score sal-sustainability__score--(\d+)\b",
-                                                    MetricMatchMethod.REGEX),
-    }
+for metric_key in metric_key_list:
+    for page_template in metric_key.page_template_dict.keys():
+        page_template.add_metric_key_list(metric_key)
+
+
+morningstar_page_template_dict = {
+    source_key_uk: [ms_page_uk_compare, ms_page_uk_overview, ms_page_uk_sustainability],
+    source_key_hk: [ms_page_hk_search]
 }
 
-for metric_name in metric_key_compare_page_list:
-    morningstar_metric_dict[source_key_uk][metric_name] = MsMetricTemplate(metric_name, morningstar_page_uk_compare, metric_name, MetricMatchMethod.TD_DEV)
-
-morningstar_page_url_uk = {
-    'Overview': {"url": "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id",
-                 "timeout": 1},
-    # 'Portfolio': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=3",
-    # 'Performance': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=1",
-    # 'RiskAndRating': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=2",
-    # 'Sustainability': "https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=morningstar_id&tab=6",
-    'SustainabilitySAL': {
-        "url": "https://www.morningstar.co.uk/Common/funds/snapshot/SustainabilitySAL.aspx?Site=uk&FC=morningstar_id&IT=FO&LANG=en-GB",
-        "timeout": 15},
-}
-
-morningstar_page_check_word_uk = {
-    'Overview': {"star": r"ating_sprite stars(\d)",
-                 "medalist": r"rating_sprite medalist-rating-(\d)"},
-    'SustainabilitySAL': {"sustainability": r"sal-sustainability__score sal-sustainability__score--(\d)"},
-}
-
-hk_lang_suffix_zh = "&lang=en-HK"
-
-morningstar_page_url_hk = {
-    'Sustainability': {
-        "url": "https://www.morningstar.hk/hk/report/fund/sustainability.aspx?t=morningstar_id&fundservcode=&lang=en-HK",
-        "timeout": 15},
-}
-
-morningstar_page_check_word_hk = {
-    'Sustainability': {"sustainability": r"sal-sustainability__score sal-sustainability__score--(\d)"},
-}

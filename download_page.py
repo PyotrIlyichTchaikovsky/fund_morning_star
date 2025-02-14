@@ -1,8 +1,12 @@
 import global_values
-from moring_star_logic import MsPageFactory
+from moring_star_logic import MsPageFactory, login_to_morningstar
 
-page = MsPageFactory.create_page("F00000V1V8", global_values.morningstar_page_uk_sustainability)
+login_to_morningstar("UK")
+login_to_morningstar("HK")
 
-page.check_disk_complete()
-page.load_from_web_and_save()
+for page_template in global_values.morningstar_page_template_dict[global_values.source_key_hk]:
+    page = MsPageFactory.create_page("F00000VRG9", page_template)
+
+    page.check_disk_complete()
+    page.load_from_web_and_save()
 

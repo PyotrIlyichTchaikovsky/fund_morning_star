@@ -120,7 +120,7 @@ if __name__ == "__main__":
     isin_list_hsbc = load_isin(global_values.hsbc_isin_excel_path)
     isin_list_sc = load_isin(global_values.sc_isin_excel_path)
 
-    isin_map: dict[str: ISINInfo] = {}
+    isin_map: dict[str, ISINInfo] = {}
     make_isin_map(isin_map, isin_list_hsbc, "汇丰")
     make_isin_map(isin_map, isin_list_sc, "渣打")
 

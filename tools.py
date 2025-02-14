@@ -1,40 +1,22 @@
 import os
 import re
+from typing import Dict
+
 import openpyxl
+from bs4 import BeautifulSoup
 from openpyxl.styles import NamedStyle
 import pandas as pd
 
 
-def filter_file_by_keyword(file_path, keyword_pattern):
-    with open(file_path, 'r', encoding='utf-8') as file:  # 显式指定编码为utf-8
-        for line in file:
-            match = re.search(keyword_pattern, line)
-            if match:
-                return match.group(1)
+def filter_by_keyword(content: str, keyword_pattern: str) -> str:
+    match = re.search(keyword_pattern, content)
+    if match:
+        return match.group(1)
     return "-9"
 
 
-def count_keyword(file_path: str, target_string: str) -> str:
-    """
-    计算文件中指定字符串出现的次数（UTF-8 编码）。
-
-    参数:
-        file_path (str): 文件路径
-        target_string (str): 需要查找的字符串
-
-    返回:
-        int: 字符串在文件中出现的次数
-    """
-    count = 0
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            for line in file:
-                count += line.count(target_string)  # 统计每行中 target_string 出现的次数
-    except FileNotFoundError:
-        print(f"错误：文件 '{file_path}' 未找到")
-    except Exception as e:
-        print(f"读取文件时发生错误: {e}")
-
+def count_keyword(content: str, target_string: str) -> str:
+    count = content.count(target_string)
     if count == 0:
         count = -9
     return str(count)
@@ -173,3 +155,116 @@ def check_excel_for_keys(excel_path, col_name, required_keys):
     except Exception as e:
         print(f"Error reading the Excel file: {e}")
         return False
+
+
+def parse_metric_from_div_pair(html_content: str) -> Dict[str, str]:
+    # 解析HTML内容
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # 初始化一个空字典
+    data_dict: Dict[str, str] = {}
+
+    # 获取所有的li标签
+    items = soup.find_all('li', class_='sal-snap-panel')
+
+    # 遍历每个li元素，提取名称和值并添加到字典中
+    for item in items:
+        name = item.find('div', class_='sal-dp-name').text.strip()
+        value = clean_span_content(item.find('div', class_='sal-dp-value').text)
+        data_dict[name] = value
+
+    return data_dict
+
+
+def parse_metric_from_table(html_content: str, table_class: str, row_key: str) -> Dict[str, str]:
+    # 解析HTML内容
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # 获取第一个符合特定class的表格
+    table = soup.find('table', class_=table_class)
+
+    if not table:
+        return {}
+
+    # 获取表头（th）的文本内容，用作字典的键
+    headers = [th.get_text(strip=True) for th in table.find_all('th')]
+
+    # 获取所有的行（tr），包括表头和数据行
+    rows = table.find_all('tr')
+
+    row_dict: Dict[str, str] = {}
+    # 遍历所有数据行，查找第一列的值匹配指定值的行
+    for row in rows:
+        cells = row.find_all('td')
+        if cells:
+            first_column_value = cells[0].get_text(strip=True)
+            if first_column_value == row_key:
+                # 找到匹配的行，排除第一列
+                for header, cell in zip(headers[1:], cells[1:]):
+                    row_dict[header] = clean_span_content(cell.get_text(strip=True))
+                break  # 找到对应行后停止遍历
+
+    return row_dict
+
+
+def parse_metric_from_compare_page(html_content: str) -> Dict[str, str]:
+    metric_dict: dict[str, any] = {}
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # 找到所有的<td>标签
+    td_elements = soup.find_all('td')
+    # 提取data-title和div的title内容的对应关系
+    for idx, td in enumerate(td_elements):
+        metric_name = td.get('data-title')
+
+        div = td.find('div')
+        if div:
+            # 首先尝试获取div的title属性
+            metric_value = div.get('title')
+            # 如果div_title为空，则尝试获取div的文本内容
+            if not metric_value:
+                metric_value = div.get_text(strip=True)
+
+            # 如果data_title为空，则将其修改为第几个key
+            if not metric_name:
+                metric_name = f"key_{idx + 1}"
+
+            metric_dict[metric_name] = clean_span_content(metric_value)
+
+    return metric_dict
+
+
+
+def parse_metric_from_search_page(html_content: str) -> Dict[str, str]:
+    metric_dict: dict[str, any] = {}
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # 找到所有的<td>标签
+    td_elements = soup.find_all('td')
+    # 提取data-title和div的title内容的对应关系
+    for idx, td in enumerate(td_elements):
+        metric_name = td.get('data-title')
+        if metric_name == "":
+            continue
+
+        div = td.find('div')
+        if div:
+            # 首先尝试获取div的title属性
+            metric_value = div.get('title')
+            # 如果div_title为空，则尝试获取div的文本内容
+            if not metric_value:
+                metric_value = div.get_text(strip=True)
+
+            # 如果data_title为空，则将其修改为第几个key
+            if not metric_name:
+                metric_name = f"key_{idx + 1}"
+
+            metric_dict[metric_name] = clean_span_content(metric_value)
+
+    return metric_dict
+
+
+def get_all_subclasses(cls):
+    subclasses = cls.__subclasses__()
+    result = subclasses.copy()
+    for subclass in subclasses:
+        result.extend(get_all_subclasses(subclass))
+    return result
