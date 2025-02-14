@@ -16,7 +16,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import base_define
 import global_values
 import tools
-from base_define import MsPageTemplate, SingletonMeta, MetricMatchMethod
+from base_define import MsPageTemplate, SingletonMeta
 
 
 def init_chrome(source: str):

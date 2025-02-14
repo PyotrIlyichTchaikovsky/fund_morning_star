@@ -3,7 +3,8 @@ from __future__ import annotations  # 自动处理前向引用
 import os
 from typing import List
 
-from base_define import MetricMatchMethod, MsPageTemplate, MsMetricKey
+from base_define import MsPageTemplate, MsMetricKey, PercentageCell, DeviationCell, StarCell, ReturnOverallCell, \
+    RiskOverallCell
 
 base_dir = r"files"
 
@@ -16,6 +17,7 @@ sc_original_funds_info_path = os.path.join(base_dir, "sc/funds_table_html_sc.txt
 sc_isin_excel_path = os.path.join(base_dir, "sc/ISIN_SC.xlsx")
 
 morningstar_code_excel_path = os.path.join(base_dir, "morningstar/MorningStar.xlsx")
+morningstar_post_process_excel_path = os.path.join(base_dir, "morningstar/MorningStar_PostProcess.xlsx")
 morningstar_page_source_dir = os.path.join(base_dir, "morningstar/morningstar_pages")
 
 morningstar_code_search_url_suffix = "util/SecuritySearch.ashx?source=nav&moduleId=6&ifIncludeAds=True&usrType=f"
@@ -69,20 +71,20 @@ ms_page_hk_search = MsPageTemplate(source_key_hk,
                                    )
 
 metric_key_list: List[MsMetricKey] = [
-    MsMetricKey("star", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Rating™"}),
-    MsMetricKey("medalist", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Medalist Rating™"}),
-    MsMetricKey("sustainability", {ms_page_uk_sustainability: "", ms_page_hk_search: "Morningstar Sustainability Rating™"}),
+    MsMetricKey("star", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Rating™"}, StarCell()),
+    MsMetricKey("medalist", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Medalist Rating™"}, StarCell()),
+    MsMetricKey("sustainability", {ms_page_uk_sustainability: "", ms_page_hk_search: "Morningstar Sustainability Rating™"}, StarCell()),
 
     MsMetricKey("Total Assets", {ms_page_uk_compare: "", ms_page_hk_search: "Fund Size (Mil)"}),
     MsMetricKey("Category", {ms_page_uk_compare: "", ms_page_hk_search: "Morningstar Category"}),
-    MsMetricKey("1 Year (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "1 Year Annualised (%)"}),
-    MsMetricKey("3 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Years Annualised (%)"}),
-    MsMetricKey("5 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "5 Years Annualised (%)"}),
-    MsMetricKey("10 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "10 Years Annualised (%)"}),
-    MsMetricKey("Standard Deviation (3yr)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Year Standard Deviation"}),
-    MsMetricKey("Total Return After Fees", {ms_page_uk_compare: ""}),
-    MsMetricKey("Morningstar Return (Overall)", {ms_page_uk_compare: ""}),
-    MsMetricKey("Morningstar Risk (Overall)", {ms_page_uk_compare: ""}),
+    MsMetricKey("1 Year (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "1 Year Annualised (%)"}, PercentageCell()),
+    MsMetricKey("3 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Years Annualised (%)"}, PercentageCell()),
+    MsMetricKey("5 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "5 Years Annualised (%)"}, PercentageCell()),
+    MsMetricKey("10 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "10 Years Annualised (%)"}, PercentageCell()),
+    MsMetricKey("Standard Deviation (3yr)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Year Standard Deviation"}, DeviationCell()),
+    MsMetricKey("Total Return After Fees", {ms_page_uk_compare: ""}, PercentageCell()),
+    MsMetricKey("Morningstar Return (Overall)", {ms_page_uk_compare: ""}, ReturnOverallCell()),
+    MsMetricKey("Morningstar Risk (Overall)", {ms_page_uk_compare: ""}, RiskOverallCell()),
 ]
 
 

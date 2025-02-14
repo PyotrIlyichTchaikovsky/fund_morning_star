@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Dict
+from typing import Dict, Union, Optional
 
 import openpyxl
 from bs4 import BeautifulSoup
@@ -268,3 +268,40 @@ def get_all_subclasses(cls):
     for subclass in subclasses:
         result.extend(get_all_subclasses(subclass))
     return result
+
+def str_to_number(value: Union[str, float, int]) -> Optional[float]:
+    if isinstance(value, (int, float)):
+        # 如果已经是数字，直接返回
+        return float(value)
+    try:
+        # 尝试将字符串转换为浮动数字
+        return float(value)
+    except ValueError:
+        # 如果转换失败，返回 None
+        return None
+
+def str_to_percentage(percentage_str: str) -> Optional[float]:
+    percentage_str = percentage_str.replace('−', '-')  # 替换长破折号为标准减号
+
+    # 检查字符串是否以 "%" 结尾
+    if percentage_str.endswith('%'):
+        percentage_str = percentage_str[:-1]
+
+    try:
+        numeric_value = float(percentage_str)
+        # 转换为小数形式（即百分比除以 100）
+        return round(numeric_value / 100, 4)
+    except ValueError:
+        # 如果转换失败，返回 None
+        return None
+
+
+def extract_number_from_end(s: str) -> Optional[int]:
+    # 使用正则表达式检查字符串末尾是否有数字（包括负数），并提取数字部分
+    match = re.search(r'(-?\d+)$', s)  # 正则表达式允许匹配负号
+
+    # 如果匹配成功，返回数字部分，否则返回 0
+    if match:
+        return int(match.group(1))  # 提取并转换为整数
+    else:
+        return 0  # 如果没有数字结尾，返回0

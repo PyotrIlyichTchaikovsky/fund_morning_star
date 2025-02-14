@@ -25,11 +25,11 @@ def add_to_excel(fund_info: MsFundInfo, df):
     # Find the index of the row with the given morningstar_id
     row_index = df[df['MorningStarID'] == morningstar_id].index[0]
 
-    # Iterate over FundScore in the score_dict and add each to the row
-    for metric_name, metric_value in metric_dict.items():
-        # Add a new column if score_cat does not exist, otherwise update the value
-        col_name = metric_name  # Using the score category as the column name
-        df.at[row_index, col_name] = metric_value
+    for metric_key in global_values.metric_key_list:
+        if metric_key.metric_name in metric_dict:
+            metric_value = metric_dict[metric_key.metric_name]
+            col_name = metric_key.metric_name  # Using the score category as the column name
+            df.at[row_index, col_name] = metric_value
 
     # Save the changes back to the Excel file
     print(f"Data added for Morningstar ID {morningstar_id}.")
