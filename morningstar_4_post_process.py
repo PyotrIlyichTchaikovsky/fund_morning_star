@@ -1,11 +1,34 @@
-from typing import Callable
-
 import pandas as pd
 from openpyxl.reader.excel import load_workbook
 from openpyxl.styles import PatternFill
+from openpyxl.utils import get_column_letter
 
 import global_values
 from base_define import CellModification, ExcelCellProc
+
+
+def set_freeze(worksheet, freeze_row, freeze_col):
+    freeze_cell = f"{get_column_letter(freeze_col)}{freeze_row + 1}"
+    worksheet.freeze_panes = freeze_cell
+
+
+def set_sorting(worksheet, sort_conditions: list):
+    # 获取表头的列名，假设表头在第一行
+    header_row = [cell.value for cell in worksheet[1]]
+
+    sort_refs = []
+    for col_name, order in sort_conditions:
+        if col_name in header_row:
+            col_idx = header_row.index(col_name) + 1  # 获取列的索引（1开始）
+            sort_ref = f'{get_column_letter(col_idx)}2:{get_column_letter(col_idx)}1048576'  # 排序的范围
+            sort_refs.append((sort_ref, order))
+
+    # 设置筛选和排序条件
+    worksheet.auto_filter.ref = f'A1:{get_column_letter(worksheet.max_column)}1'  # 设置自动筛选范围
+
+    for sort_ref, order in sort_refs:
+        # 添加排序条件，按升序（ascending）或降序（descending）
+        worksheet.auto_filter.add_sort_condition(sort_ref, descending=order)
 
 
 def post_process(original_excel_path: str, new_excel_path: str):
@@ -13,13 +36,25 @@ def post_process(original_excel_path: str, new_excel_path: str):
     for metric_key in global_values.metric_key_list:
         if metric_key.excel_proc is not None:
             process_col(workbook, metric_key.metric_name, metric_key.excel_proc)
+
+    # 1. 设置冻结窗格：冻结到第一行和C列
+    set_freeze(workbook.active, 1, 4)  # 第一行冻结，C列冻结（列C的列号是3）
+    # 2. 设置排序：按照列名和排序方式进行排序
+    sort_conditions = [
+        ("5 Yr", True),
+        ("10Yr", True),
+        ("3 Yr", True),
+    ]
+    set_sorting(workbook.active, sort_conditions)
+
     workbook.save(new_excel_path)  # 直接保存工作簿，修改会写入到原文件中
+
 
 
 # process方法
 def process_col(workbook, col_name: str, excel_cell_proc: ExcelCellProc) -> None:
     # 加载Excel文件进行修改（通过openpyxl）
-    sheet = workbook['Sheet1']  # 获取Sheet1工作表
+    sheet = workbook.active  # 获取Sheet1工作表
 
     # 找到目标列的索引（根据列名）
     header_row = sheet[1]  # 获取第一行作为表头

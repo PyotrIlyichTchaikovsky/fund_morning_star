@@ -71,20 +71,21 @@ ms_page_hk_search = MsPageTemplate(source_key_hk,
                                    )
 
 metric_key_list: List[MsMetricKey] = [
+    MsMetricKey("Category", {ms_page_uk_compare: "", ms_page_hk_search: "Morningstar Category"}),
+    MsMetricKey("Total Assets", {ms_page_uk_compare: "", ms_page_hk_search: "Fund Size (Mil)"}),
+
     MsMetricKey("star", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Rating™"}, StarCell()),
     MsMetricKey("medalist", {ms_page_uk_overview: "", ms_page_hk_search: "Morningstar Medalist Rating™"}, StarCell()),
     MsMetricKey("sustainability", {ms_page_uk_sustainability: "", ms_page_hk_search: "Morningstar Sustainability Rating™"}, StarCell()),
 
-    MsMetricKey("Total Assets", {ms_page_uk_compare: "", ms_page_hk_search: "Fund Size (Mil)"}),
-    MsMetricKey("Category", {ms_page_uk_compare: "", ms_page_hk_search: "Morningstar Category"}),
-    MsMetricKey("1 Year (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "1 Year Annualised (%)"}, PercentageCell()),
-    MsMetricKey("3 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Years Annualised (%)"}, PercentageCell()),
-    MsMetricKey("5 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "5 Years Annualised (%)"}, PercentageCell()),
-    MsMetricKey("10 Years (ann)", {ms_page_uk_compare: "", ms_page_hk_search: "10 Years Annualised (%)"}, PercentageCell()),
-    MsMetricKey("Standard Deviation (3yr)", {ms_page_uk_compare: "", ms_page_hk_search: "3 Year Standard Deviation"}, DeviationCell()),
+    MsMetricKey("1 Yr", {ms_page_uk_compare: "1 Year (ann)", ms_page_hk_search: "1 Year Annualised (%)"}, PercentageCell()),
+    MsMetricKey("3 Yr", {ms_page_uk_compare: "3 Years (ann)", ms_page_hk_search: "3 Years Annualised (%)"}, PercentageCell()),
+    MsMetricKey("5 Yr", {ms_page_uk_compare: "5 Years (ann)", ms_page_hk_search: "5 Years Annualised (%)"}, PercentageCell()),
+    MsMetricKey("10Yr", {ms_page_uk_compare: "10 Years (ann)", ms_page_hk_search: "10 Years Annualised (%)"}, PercentageCell()),
+    MsMetricKey("SD(3yr)", {ms_page_uk_compare: "Standard Deviation (3yr)", ms_page_hk_search: "3 Year Standard Deviation"}, DeviationCell()),
     MsMetricKey("Total Return After Fees", {ms_page_uk_compare: ""}, PercentageCell()),
-    MsMetricKey("Morningstar Return (Overall)", {ms_page_uk_compare: ""}, ReturnOverallCell()),
-    MsMetricKey("Morningstar Risk (Overall)", {ms_page_uk_compare: ""}, RiskOverallCell()),
+    MsMetricKey("Return", {ms_page_uk_compare: "Morningstar Return (Overall)"}, ReturnOverallCell()),
+    MsMetricKey("Risk", {ms_page_uk_compare: "Morningstar Risk (Overall)"}, RiskOverallCell()),
 ]
 
 
