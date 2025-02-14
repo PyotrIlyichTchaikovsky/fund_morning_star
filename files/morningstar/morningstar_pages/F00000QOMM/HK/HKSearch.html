@@ -1,0 +1,364 @@
+<tr data-ng-repeat-start="obj in visibleData track by keyFieldParsed(obj) || $index" data-ng-attr-aria-hidden="{{(false&amp;&amp; $index >5- 1) ? true : undefined}}" data-ng-class="[isSelected(keyFieldParsed(obj)) ? 'ec-table__row--selected' : '',
+                    (templates.expandedRow &amp;&amp; obj._displayingExpandedView) ? 'ec-table__row--expanded' : '',false? 'ec-table__row--clickable' : '',
+                    (false&amp;&amp; $index >5- 1) ? 'ec-table__row--hide' : '']" data-ng-init="rowIndex=$index" class="ec-table__row ec-table__row--0 mds-data-table__row" id="ec-screener-table-securities-row-0" role="row">
+                <!-- ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="" class="ec-table__cell mds-data-table__cell ng-scope ec-table__cell--checkbox ec-table__cell--sticky" headers="ec-screener-table-securities-header-selected" data-col-index="0" data-key="F00000QOMM">
+    <div class="ec-table__cell-content ec-table__cell--checkbox-wrap ng-scope">
+        <div class="ec-form__checkbox">
+            <label class="ec-form__label ec-form__label--checkbox mds-form__checkbox mds-form__checkbox--hide-label" for="ec-screener-table-securities-selected-checkbox--F0000-0">
+                <input id="ec-screener-table-securities-selected-checkbox--F0000-0" type="checkbox" data-ng-checked="isSelected(keyFieldParsed(obj))" data-ng-click="toggleSelectedRow(keyFieldParsed(obj), obj, $event, field)" class="ec-table__checkbox mds-form__checkbox-input">
+                <span class="mds-form__checkbox-visible-wrap">
+                    <span class="mds-form__checkbox-visual">
+                        <svg class="mds-icon mds-form__checkbox-checked-icon" aria-hidden="true">
+                            <use xlink:href="#check--s"> </use>
+                        </svg>
+                        <svg class="mds-icon mds-form__checkbox-indeterminate-icon" aria-hidden="true">
+                            <use xlink:href="#minus--s"> </use>
+                        </svg>
+                    </span>
+                </span>
+                <span class="ec-form__checkbox-text mds-form__checkbox-text">Check-box for table item</span>
+            </label>
+        </div>
+
+    </div>
+</td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Name" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--sticky" headers="ec-screener-table-securities-header-legalName" data-col-index="1" data-key="F00000QOMM"><div data-mstar-include="templates.hyperLink" class="ng-scope"><span class="ec-table-combined-key-field__name ng-scope">
+    <a class="mds-link mds-link--no-underline ec-table__investment-link ng-binding" data-ng-attr-target="{{field.fieldSettings.hyperlink.target || '_self'}}" data-ng-class="field.fieldSettings.hyperlink.cssClass" data-ng-click="instance.trigger('click', [$event, 'reportLinkClick' , {secId: obj.secId}])" data-ng-href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK" target="_self" href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK">
+        Schroder Asian Asset Income Fund A Distribution RMB Hedged
+    </a>
+</span>
+<!-- ngIf: obj.trackRecordExtension -->
+<br class="ng-scope">
+<!-- ngIf: obj.sectorName && obj.industryName --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Last Close Price" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-closePrice" data-col-index="2" data-key="F00000QOMM"><div class="ec-table__cell-content ng-binding ng-scope">75.62 CNH</div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Yield (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-yield_M12" data-col-index="3" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="4.17">
+                        4.17
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Morningstar Category" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-categoryName" data-col-index="4" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="Other Allocation">
+                        Other Allocation
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Morningstar Medalist Rating™" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-medalist_RatingNumber" data-col-index="5" data-key="F00000QOMM"><div class="ec-table__cell-content ng-scope" data-ng-switch="obj.medalist_RatingNumber"><!-- ngSwitchWhen: 7 --> <!-- ngSwitchWhen: 6 --> <!-- ngSwitchWhen: 5 --> <!-- ngSwitchWhen: 4 --> <!-- ngSwitchWhen: 3 --> <!-- ngSwitchWhen: 2 --> <!-- ngSwitchWhen: 1 --> <!-- ngSwitchDefault:  --><div data-ng-switch-default="" class="ng-binding ng-scope">–</div><!-- end ngSwitchWhen:  --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Morningstar Rating™" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-starRatingM255" data-col-index="6" data-key="F00000QOMM"><div class="ec-table__cell-content ng-scope">
+    <!-- ngIf: obj.starRatingM255 -->
+    <!-- ngIf: !obj.starRatingM255 --><span data-ng-if="!obj.starRatingM255" class="ng-binding ng-scope">–</span><!-- end ngIf: !obj.starRatingM255 -->
+</div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Morningstar Sustainability Rating™" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--last ec-table__cell--out-of-range" headers="ec-screener-table-securities-header-sustainabilityRank" data-col-index="7" data-key="F00000QOMM" aria-hidden="true"><div class="ec-table__cell-content ng-scope">
+    <!-- ngIf: obj.sustainabilityRank --><div data-ng-if="obj.sustainabilityRank" class="ec-table__sustainability-ranks ec-table__sustainability-ranks--1" title="Morningstar Sustainability Rating™ 1">
+        <span class="ec-screener--visually-hidden ng-binding">Morningstar Sustainability Rating™ 1</span>
+    </div><!-- end ngIf: obj.sustainabilityRank -->
+    <!-- ngIf: !obj.sustainabilityRank -->
+</div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName -->
+                <!-- ngIf: false -->
+            </tr><tr data-ng-repeat-start="obj in visibleData track by keyFieldParsed(obj) || $index" data-ng-attr-aria-hidden="{{(false&amp;&amp; $index >5- 1) ? true : undefined}}" data-ng-class="[isSelected(keyFieldParsed(obj)) ? 'ec-table__row--selected' : '',
+                    (templates.expandedRow &amp;&amp; obj._displayingExpandedView) ? 'ec-table__row--expanded' : '',false? 'ec-table__row--clickable' : '',
+                    (false&amp;&amp; $index >5- 1) ? 'ec-table__row--hide' : '']" data-ng-init="rowIndex=$index" class="ec-table__row ec-table__row--0 mds-data-table__row" id="ec-screener-table-securities-row-0" role="row">
+                <!-- ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="" class="ec-table__cell mds-data-table__cell ng-scope ec-table__cell--checkbox ec-table__cell--sticky" headers="ec-screener-table-securities-header-selected" data-col-index="0" data-key="F00000QOMM">
+    <div class="ec-table__cell-content ec-table__cell--checkbox-wrap ng-scope">
+        <div class="ec-form__checkbox">
+            <label class="ec-form__label ec-form__label--checkbox mds-form__checkbox mds-form__checkbox--hide-label" for="ec-screener-table-securities-selected-checkbox--F0000-0">
+                <input id="ec-screener-table-securities-selected-checkbox--F0000-0" type="checkbox" data-ng-checked="isSelected(keyFieldParsed(obj))" data-ng-click="toggleSelectedRow(keyFieldParsed(obj), obj, $event, field)" class="ec-table__checkbox mds-form__checkbox-input">
+                <span class="mds-form__checkbox-visible-wrap">
+                    <span class="mds-form__checkbox-visual">
+                        <svg class="mds-icon mds-form__checkbox-checked-icon" aria-hidden="true">
+                            <use xlink:href="#check--s"> </use>
+                        </svg>
+                        <svg class="mds-icon mds-form__checkbox-indeterminate-icon" aria-hidden="true">
+                            <use xlink:href="#minus--s"> </use>
+                        </svg>
+                    </span>
+                </span>
+                <span class="ec-form__checkbox-text mds-form__checkbox-text">Check-box for table item</span>
+            </label>
+        </div>
+
+    </div>
+</td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Name" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--sticky" headers="ec-screener-table-securities-header-legalName" data-col-index="1" data-key="F00000QOMM"><div data-mstar-include="templates.hyperLink" class="ng-scope"><span class="ec-table-combined-key-field__name ng-scope">
+    <a class="mds-link mds-link--no-underline ec-table__investment-link ng-binding" data-ng-attr-target="{{field.fieldSettings.hyperlink.target || '_self'}}" data-ng-class="field.fieldSettings.hyperlink.cssClass" data-ng-click="instance.trigger('click', [$event, 'reportLinkClick' , {secId: obj.secId}])" data-ng-href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK" target="_self" href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK">
+        Schroder Asian Asset Income Fund A Distribution RMB Hedged
+    </a>
+</span>
+<!-- ngIf: obj.trackRecordExtension -->
+<br class="ng-scope">
+<!-- ngIf: obj.sectorName && obj.industryName --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="1 Day Return (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnD1" data-col-index="2" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="−0.27">
+                        −0.27
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="1 Week Return (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnW1" data-col-index="3" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="0.11">
+                        0.11
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="1 Month Return (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM1" data-col-index="4" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="0.31">
+                        0.31
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Months Return (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM3" data-col-index="5" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="0.49">
+                        0.49
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="6 Months Return (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--last mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM6" data-col-index="6" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="2.27">
+                        2.27
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName -->
+                <!-- ngIf: false -->
+            </tr><tr data-ng-repeat-start="obj in visibleData track by keyFieldParsed(obj) || $index" data-ng-attr-aria-hidden="{{(false&amp;&amp; $index >5- 1) ? true : undefined}}" data-ng-class="[isSelected(keyFieldParsed(obj)) ? 'ec-table__row--selected' : '',
+                    (templates.expandedRow &amp;&amp; obj._displayingExpandedView) ? 'ec-table__row--expanded' : '',false? 'ec-table__row--clickable' : '',
+                    (false&amp;&amp; $index >5- 1) ? 'ec-table__row--hide' : '']" data-ng-init="rowIndex=$index" class="ec-table__row ec-table__row--0 mds-data-table__row" id="ec-screener-table-securities-row-0" role="row">
+                <!-- ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="" class="ec-table__cell mds-data-table__cell ng-scope ec-table__cell--checkbox ec-table__cell--sticky" headers="ec-screener-table-securities-header-selected" data-col-index="0" data-key="F00000QOMM">
+    <div class="ec-table__cell-content ec-table__cell--checkbox-wrap ng-scope">
+        <div class="ec-form__checkbox">
+            <label class="ec-form__label ec-form__label--checkbox mds-form__checkbox mds-form__checkbox--hide-label" for="ec-screener-table-securities-selected-checkbox--F0000-0">
+                <input id="ec-screener-table-securities-selected-checkbox--F0000-0" type="checkbox" data-ng-checked="isSelected(keyFieldParsed(obj))" data-ng-click="toggleSelectedRow(keyFieldParsed(obj), obj, $event, field)" class="ec-table__checkbox mds-form__checkbox-input">
+                <span class="mds-form__checkbox-visible-wrap">
+                    <span class="mds-form__checkbox-visual">
+                        <svg class="mds-icon mds-form__checkbox-checked-icon" aria-hidden="true">
+                            <use xlink:href="#check--s"> </use>
+                        </svg>
+                        <svg class="mds-icon mds-form__checkbox-indeterminate-icon" aria-hidden="true">
+                            <use xlink:href="#minus--s"> </use>
+                        </svg>
+                    </span>
+                </span>
+                <span class="ec-form__checkbox-text mds-form__checkbox-text">Check-box for table item</span>
+            </label>
+        </div>
+
+    </div>
+</td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Name" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--sticky" headers="ec-screener-table-securities-header-legalName" data-col-index="1" data-key="F00000QOMM"><div data-mstar-include="templates.hyperLink" class="ng-scope"><span class="ec-table-combined-key-field__name ng-scope">
+    <a class="mds-link mds-link--no-underline ec-table__investment-link ng-binding" data-ng-attr-target="{{field.fieldSettings.hyperlink.target || '_self'}}" data-ng-class="field.fieldSettings.hyperlink.cssClass" data-ng-click="instance.trigger('click', [$event, 'reportLinkClick' , {secId: obj.secId}])" data-ng-href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK" target="_self" href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK">
+        Schroder Asian Asset Income Fund A Distribution RMB Hedged
+    </a>
+</span>
+<!-- ngIf: obj.trackRecordExtension -->
+<br class="ng-scope">
+<!-- ngIf: obj.sectorName && obj.industryName --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="YTD Return (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM0" data-col-index="2" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="1.45">
+                        1.45
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="1 Year Annualised (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM12" data-col-index="3" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="7.26">
+                        7.26
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Years Annualised (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM36" data-col-index="4" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="−4.07">
+                        −4.07
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="5 Years Annualised (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM60" data-col-index="5" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="0.00">
+                        0.00
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="10 Years Annualised (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--last mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-gbrReturnM120" data-col-index="6" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="3.60">
+                        3.60
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName -->
+                <!-- ngIf: false -->
+            </tr><tr data-ng-repeat-start="obj in visibleData track by keyFieldParsed(obj) || $index" data-ng-attr-aria-hidden="{{(false&amp;&amp; $index >5- 1) ? true : undefined}}" data-ng-class="[isSelected(keyFieldParsed(obj)) ? 'ec-table__row--selected' : '',
+                    (templates.expandedRow &amp;&amp; obj._displayingExpandedView) ? 'ec-table__row--expanded' : '',false? 'ec-table__row--clickable' : '',
+                    (false&amp;&amp; $index >5- 1) ? 'ec-table__row--hide' : '']" data-ng-init="rowIndex=$index" class="ec-table__row ec-table__row--0 mds-data-table__row" id="ec-screener-table-securities-row-0" role="row">
+                <!-- ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="" class="ec-table__cell mds-data-table__cell ng-scope ec-table__cell--checkbox ec-table__cell--sticky" headers="ec-screener-table-securities-header-selected" data-col-index="0" data-key="F00000QOMM">
+    <div class="ec-table__cell-content ec-table__cell--checkbox-wrap ng-scope">
+        <div class="ec-form__checkbox">
+            <label class="ec-form__label ec-form__label--checkbox mds-form__checkbox mds-form__checkbox--hide-label" for="ec-screener-table-securities-selected-checkbox--F0000-0">
+                <input id="ec-screener-table-securities-selected-checkbox--F0000-0" type="checkbox" data-ng-checked="isSelected(keyFieldParsed(obj))" data-ng-click="toggleSelectedRow(keyFieldParsed(obj), obj, $event, field)" class="ec-table__checkbox mds-form__checkbox-input">
+                <span class="mds-form__checkbox-visible-wrap">
+                    <span class="mds-form__checkbox-visual">
+                        <svg class="mds-icon mds-form__checkbox-checked-icon" aria-hidden="true">
+                            <use xlink:href="#check--s"> </use>
+                        </svg>
+                        <svg class="mds-icon mds-form__checkbox-indeterminate-icon" aria-hidden="true">
+                            <use xlink:href="#minus--s"> </use>
+                        </svg>
+                    </span>
+                </span>
+                <span class="ec-form__checkbox-text mds-form__checkbox-text">Check-box for table item</span>
+            </label>
+        </div>
+
+    </div>
+</td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Name" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--sticky" headers="ec-screener-table-securities-header-legalName" data-col-index="1" data-key="F00000QOMM"><div data-mstar-include="templates.hyperLink" class="ng-scope"><span class="ec-table-combined-key-field__name ng-scope">
+    <a class="mds-link mds-link--no-underline ec-table__investment-link ng-binding" data-ng-attr-target="{{field.fieldSettings.hyperlink.target || '_self'}}" data-ng-class="field.fieldSettings.hyperlink.cssClass" data-ng-click="instance.trigger('click', [$event, 'reportLinkClick' , {secId: obj.secId}])" data-ng-href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK" target="_self" href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK">
+        Schroder Asian Asset Income Fund A Distribution RMB Hedged
+    </a>
+</span>
+<!-- ngIf: obj.trackRecordExtension -->
+<br class="ng-scope">
+<!-- ngIf: obj.sectorName && obj.industryName --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Initial Charge (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-maxFrontEndLoad" data-col-index="2" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="5.00">
+                        5.00
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Ongoing Charge (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-ongoingCharge" data-col-index="3" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="–">
+                        –
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Manager Tenure (Yrs)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-managerTenure" data-col-index="4" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="3.42">
+                        3.42
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Deferred Fee (%)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-maxDeferredLoad" data-col-index="5" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="–">
+                        –
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Minimum Initial Purchase" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--last mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-initialPurchase" data-col-index="6" data-key="F00000QOMM"><div class="ec-table__cell-content ng-scope">
+    <span class="ng-binding">5.00k</span><span class="ng-binding"></span>
+</div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName -->
+                <!-- ngIf: false -->
+            </tr><tr data-ng-repeat-start="obj in visibleData track by keyFieldParsed(obj) || $index" data-ng-attr-aria-hidden="{{(false&amp;&amp; $index >5- 1) ? true : undefined}}" data-ng-class="[isSelected(keyFieldParsed(obj)) ? 'ec-table__row--selected' : '',
+                    (templates.expandedRow &amp;&amp; obj._displayingExpandedView) ? 'ec-table__row--expanded' : '',false? 'ec-table__row--clickable' : '',
+                    (false&amp;&amp; $index >5- 1) ? 'ec-table__row--hide' : '']" data-ng-init="rowIndex=$index" class="ec-table__row ec-table__row--0 mds-data-table__row" id="ec-screener-table-securities-row-0" role="row">
+                <!-- ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="" class="ec-table__cell mds-data-table__cell ng-scope ec-table__cell--checkbox ec-table__cell--sticky" headers="ec-screener-table-securities-header-selected" data-col-index="0" data-key="F00000QOMM">
+    <div class="ec-table__cell-content ec-table__cell--checkbox-wrap ng-scope">
+        <div class="ec-form__checkbox">
+            <label class="ec-form__label ec-form__label--checkbox mds-form__checkbox mds-form__checkbox--hide-label" for="ec-screener-table-securities-selected-checkbox--F0000-0">
+                <input id="ec-screener-table-securities-selected-checkbox--F0000-0" type="checkbox" data-ng-checked="isSelected(keyFieldParsed(obj))" data-ng-click="toggleSelectedRow(keyFieldParsed(obj), obj, $event, field)" class="ec-table__checkbox mds-form__checkbox-input">
+                <span class="mds-form__checkbox-visible-wrap">
+                    <span class="mds-form__checkbox-visual">
+                        <svg class="mds-icon mds-form__checkbox-checked-icon" aria-hidden="true">
+                            <use xlink:href="#check--s"> </use>
+                        </svg>
+                        <svg class="mds-icon mds-form__checkbox-indeterminate-icon" aria-hidden="true">
+                            <use xlink:href="#minus--s"> </use>
+                        </svg>
+                    </span>
+                </span>
+                <span class="ec-form__checkbox-text mds-form__checkbox-text">Check-box for table item</span>
+            </label>
+        </div>
+
+    </div>
+</td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Name" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--sticky" headers="ec-screener-table-securities-header-legalName" data-col-index="1" data-key="F00000QOMM"><div data-mstar-include="templates.hyperLink" class="ng-scope"><span class="ec-table-combined-key-field__name ng-scope">
+    <a class="mds-link mds-link--no-underline ec-table__investment-link ng-binding" data-ng-attr-target="{{field.fieldSettings.hyperlink.target || '_self'}}" data-ng-class="field.fieldSettings.hyperlink.cssClass" data-ng-click="instance.trigger('click', [$event, 'reportLinkClick' , {secId: obj.secId}])" data-ng-href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK" target="_self" href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK">
+        Schroder Asian Asset Income Fund A Distribution RMB Hedged
+    </a>
+</span>
+<!-- ngIf: obj.trackRecordExtension -->
+<br class="ng-scope">
+<!-- ngIf: obj.sectorName && obj.industryName --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Fund Size (Mil)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-fundTNAV" data-col-index="2" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="14,706.55 ">
+                        14,706.55 
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Equity StyleBox™" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-equityStyleBox" data-col-index="3" data-key="F00000QOMM"><div class="ec-table__cell-content ng-scope">
+    <!-- ngIf: obj.equityStyleBox --><span data-ng-if="obj.equityStyleBox" class="ec-table__equity-style-box ec-table__equity-style-box-2">
+        <span class="ec-table__equity-style-box__icon ec-table__equity-style-box__icon-2"></span>
+        <!-- ngIf: obj.equityStyleBoxName --><span data-ng-if="obj.equityStyleBoxName" class="ec-screener--visually-hidden ng-binding ng-scope">Equity StyleBox™ Large Blend</span><!-- end ngIf: obj.equityStyleBoxName -->
+    </span><!-- end ngIf: obj.equityStyleBox -->
+    <!-- ngIf: !obj.equityStyleBox -->
+</div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Fixed Income StyleBox™" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-bondStyleBox" data-col-index="4" data-key="F00000QOMM"><div class="ec-table__cell-content ng-scope">
+    <!-- ngIf: obj.bondStyleBox --><div data-ng-if="obj.bondStyleBox" class="ec-table__bond-style-box ec-table__bond-style-box-5">
+        <span class="ec-table__bond-style-box__icon ec-table__bond-style-box__icon-5"></span>
+        <!-- ngIf: obj.bondStyleBoxName --><span data-ng-if="obj.bondStyleBoxName" class="ec-screener--visually-hidden ng-binding ng-scope">Fixed Income StyleBox™ Medium Moderate</span><!-- end ngIf: obj.bondStyleBoxName -->
+    </div><!-- end ngIf: obj.bondStyleBox -->
+    <!-- ngIf: !obj.bondStyleBox -->
+</div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Average Market Cap (Mil)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-averageMarketCapital" data-col-index="5" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="317,058.12">
+                        317,058.12
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Average Credit Quality" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-averageCreditQuality" data-col-index="6" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="BB">
+                        BB
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Effective Duration" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--last ec-table__cell--out-of-range mds-data-table__cell--right" headers="ec-screener-table-securities-header-effectiveDuration" data-col-index="7" data-key="F00000QOMM" aria-hidden="true">
+                    <div class="ec-table__cell-content ng-binding" title="3.92">
+                        3.92
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName -->
+                <!-- ngIf: false -->
+            </tr><tr data-ng-repeat-start="obj in visibleData track by keyFieldParsed(obj) || $index" data-ng-attr-aria-hidden="{{(false&amp;&amp; $index >5- 1) ? true : undefined}}" data-ng-class="[isSelected(keyFieldParsed(obj)) ? 'ec-table__row--selected' : '',
+                    (templates.expandedRow &amp;&amp; obj._displayingExpandedView) ? 'ec-table__row--expanded' : '',false? 'ec-table__row--clickable' : '',
+                    (false&amp;&amp; $index >5- 1) ? 'ec-table__row--hide' : '']" data-ng-init="rowIndex=$index" class="ec-table__row ec-table__row--0 mds-data-table__row" id="ec-screener-table-securities-row-0" role="row">
+                <!-- ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="" class="ec-table__cell mds-data-table__cell ng-scope ec-table__cell--checkbox ec-table__cell--sticky" headers="ec-screener-table-securities-header-selected" data-col-index="0" data-key="F00000QOMM">
+    <div class="ec-table__cell-content ec-table__cell--checkbox-wrap ng-scope">
+        <div class="ec-form__checkbox">
+            <label class="ec-form__label ec-form__label--checkbox mds-form__checkbox mds-form__checkbox--hide-label" for="ec-screener-table-securities-selected-checkbox--F0000-0">
+                <input id="ec-screener-table-securities-selected-checkbox--F0000-0" type="checkbox" data-ng-checked="isSelected(keyFieldParsed(obj))" data-ng-click="toggleSelectedRow(keyFieldParsed(obj), obj, $event, field)" class="ec-table__checkbox mds-form__checkbox-input">
+                <span class="mds-form__checkbox-visible-wrap">
+                    <span class="mds-form__checkbox-visual">
+                        <svg class="mds-icon mds-form__checkbox-checked-icon" aria-hidden="true">
+                            <use xlink:href="#check--s"> </use>
+                        </svg>
+                        <svg class="mds-icon mds-form__checkbox-indeterminate-icon" aria-hidden="true">
+                            <use xlink:href="#minus--s"> </use>
+                        </svg>
+                    </span>
+                </span>
+                <span class="ec-form__checkbox-text mds-form__checkbox-text">Check-box for table item</span>
+            </label>
+        </div>
+
+    </div>
+</td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Name" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--sticky" headers="ec-screener-table-securities-header-legalName" data-col-index="1" data-key="F00000QOMM"><div data-mstar-include="templates.hyperLink" class="ng-scope"><span class="ec-table-combined-key-field__name ng-scope">
+    <a class="mds-link mds-link--no-underline ec-table__investment-link ng-binding" data-ng-attr-target="{{field.fieldSettings.hyperlink.target || '_self'}}" data-ng-class="field.fieldSettings.hyperlink.cssClass" data-ng-click="instance.trigger('click', [$event, 'reportLinkClick' , {secId: obj.secId}])" data-ng-href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK" target="_self" href="/hk/report/fund/performance.aspx?t=F00000QOMM&amp;lang=en-HK">
+        Schroder Asian Asset Income Fund A Distribution RMB Hedged
+    </a>
+</span>
+<!-- ngIf: obj.trackRecordExtension -->
+<br class="ng-scope">
+<!-- ngIf: obj.sectorName && obj.industryName --></div></td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="Morningstar Risk (Rel to Category)" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--unsticky" headers="ec-screener-table-securities-header-morningstarRiskM255" data-col-index="2" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="–">
+                        –
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Year Alpha" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-alphaM36" data-col-index="3" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="–">
+                        –
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Year Beta" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-betaM36" data-col-index="4" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="–">
+                        –
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Year R-Squared" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-r2M36" data-col-index="5" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="–">
+                        –
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Year Standard Deviation" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope mds-data-table__cell--right ec-table__cell--unsticky" headers="ec-screener-table-securities-header-standardDeviationM36" data-col-index="6" data-key="F00000QOMM">
+                    <div class="ec-table__cell-content ng-binding" title="15.34">
+                        15.34
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName --><td data-ec-table-cell="" data-ng-repeat="field in visibleFields track by field.fieldId || field.fieldName" data-ng-class="[(false&amp;&amp; $index >3- 1) ? 'ec-table__cell--details-hide' : '',
+                        field.formatDataType == 'number' ? 'mds-data-table__cell--right' : '']" data-ng-init="colIndex=$index" data-title="3 Year Sharpe Ratio" class="ec-table__cell ec-table__cell--data mds-data-table__cell ng-scope ec-table__cell--last ec-table__cell--out-of-range mds-data-table__cell--right" headers="ec-screener-table-securities-header-sharpeM36" data-col-index="7" data-key="F00000QOMM" aria-hidden="true">
+                    <div class="ec-table__cell-content ng-binding" title="−0.58">
+                        −0.58
+                    </div>
+                </td><!-- end ngRepeat: field in visibleFields track by field.fieldId || field.fieldName -->
+                <!-- ngIf: false -->
+            </tr>
