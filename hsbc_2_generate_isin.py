@@ -188,7 +188,7 @@ def combine_excel_files(pdf_dir):
             print("已读取第一个文件的表头，准备合并后续数据。")
             first_excel = False
 
-        print(f"正在处理文件 {excel_file}")
+        print(f"文件处理完毕： {excel_file}")
         data = df.values.tolist()
         data_with_file_name = add_column_to_array(data, f"{os.path.splitext(excel_file)[0]}.pdf")
         combined_data.append(data_with_file_name)
