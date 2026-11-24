@@ -20,7 +20,8 @@ from morningstar_isin_query import (
     normalize_market_order,
 )
 
-OUTPUT_COLUMNS = ["ISIN", "MorningStarName", "MorningStarID", "Bank", "Source"]
+OUTPUT_COLUMNS = ["ISIN", "MorningStarName", "MorningStarID", "Bank", "Source",
+                  "PriceCurrency", "PerformanceID", "QueryStatus", "QueryDetails", "MorningStarURL"]
 
 
 @dataclass
@@ -70,23 +71,54 @@ def _save_checkpoint(frame, path):
         temporary.unlink(missing_ok=True)
 
 
+def _load_reference_ids(path):
+    """只采用历史表中同一 ISIN 唯一、有效的 ID，冲突记录不提供提示。"""
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(f"未找到历史参考表：{path}")
+    frame = pd.read_excel(path, engine="openpyxl", dtype=str, keep_default_na=False)
+    required = {"ISIN", "MorningStarName", "MorningStarID"}
+    if not required.issubset(frame.columns):
+        raise ValueError(f"{path} 缺少历史参考列：{sorted(required - set(frame.columns))}")
+    frame["ISIN"] = frame["ISIN"].str.strip().str.upper()
+    frame["MorningStarID"] = frame["MorningStarID"].str.strip()
+    valid = frame.loc[frame.apply(lambda row: bool(ISIN_PATTERN.fullmatch(row["ISIN"])) and is_valid_fund_info(
+        {"n": row["MorningStarName"], "i": row["MorningStarID"]}), axis=1)]
+    return {isin: group["MorningStarID"].iloc[0] for isin, group in valid.groupby("ISIN")
+            if group["MorningStarID"].nunique() == 1}
+
+
 def _upsert_result(frame, isin, info, bank, source):
     frame = frame.loc[frame["ISIN"] != isin]
     record = {"ISIN": isin, "MorningStarName": info["n"], "MorningStarID": info["i"], "Bank": bank, "Source": source}
+    found = is_valid_fund_info(info)
+    record.update(
+        PriceCurrency=info.get("price_currency", ""), PerformanceID=info.get("performance_id", ""),
+        QueryStatus="Matched" if found else info["i"],
+        QueryDetails=info.get("reason", "") if found else info.get("reason", info["n"]),
+        MorningStarURL=f"https://global.morningstar.com/en-eu/investments/funds/{info['i']}/quote" if found else "",
+    )
     row = pd.DataFrame([record]).reindex(columns=frame.columns, fill_value="")
     return pd.concat([frame, row], ignore_index=True)
 
 
 def load_morningstar_code(
         isin_list: dict[str, ISINInfo], out_excel_path, batch_size=50, request_delay=0.2,
-        market_order=None, refresh=False,
+        market_order=None, refresh=False, reference_path=None, diagnostics_path=None,
 ):
-    """默认先香港、后英国；按配置补查未命中项，refresh=True 时重新查询有效缓存。"""
+    """默认 HK → UK → GLOBAL；可使用诊断快照离线重放，仍复用有效缓存。"""
     if not 1 <= batch_size <= 50 or request_delay < 0:
         raise ValueError("batch_size 应为 1 至 50，request_delay 不能为负数。")
     markets = normalize_market_order(market_order)
     path = Path(out_excel_path)
     frame = _load_cached_results(path)
+    lookup = get_funds_info_with_retry
+    if diagnostics_path is not None:
+        from morningstar_diagnose import load_diagnostic_lookup
+        lookup = load_diagnostic_lookup(diagnostics_path)
+    preferred_ids = {}
+    if reference_path is not None and Path(reference_path).resolve() != path.resolve():
+        preferred_ids = _load_reference_ids(reference_path)
     valid_codes = set()
     for index, row in frame.iterrows():
         isin = row["ISIN"]
@@ -94,6 +126,12 @@ def load_morningstar_code(
             frame.at[index, "Bank"] = isin_list[isin].bank_str()
             if is_valid_fund_info({"n": row["MorningStarName"], "i": row["MorningStarID"]}):
                 valid_codes.add(isin)
+                if not row["QueryStatus"]:
+                    frame.at[index, "QueryStatus"] = "Matched"
+                    frame.at[index, "QueryDetails"] = "复用已有有效结果"
+                if not row["MorningStarURL"]:
+                    frame.at[index, "MorningStarURL"] = (
+                        f"https://global.morningstar.com/en-eu/investments/funds/{row['MorningStarID']}/quote")
     pending = [isin for isin in isin_list if refresh or isin not in valid_codes]
     print(f"查询顺序：{' → '.join(markets)}。")
     print(f"共 {len(isin_list)} 个 ISIN，已有有效结果 {len(valid_codes)} 个，待查询 {len(pending)} 个。")
@@ -108,7 +146,8 @@ def load_morningstar_code(
                 if not unresolved:
                     break
                 try:
-                    results = get_funds_info_with_retry(source, unresolved, session=session)
+                    results = lookup(source, unresolved, session=session, preferred_ids=preferred_ids,
+                                     include_details=True)
                 except MorningstarQueryError as exc:
                     request_errors[source] = exc
                     print(f"[{source} 查询失败] {exc}，将继续尝试其他已配置市场。")
@@ -142,7 +181,10 @@ def load_morningstar_code(
                     details = "；".join(f"{market}: {exc}" for market, exc in request_errors.items())
                     info = {"n": f"Exception: {details}", "i": "Exception"}
                 else:
-                    info, source = errors.get(isin, ({"n": "NotFound", "i": "NotFound"}, ""))
+                    info, source = errors.get(isin, ({
+                        "n": "NotFound", "i": "NotFound",
+                        "reason": f"{'、'.join(markets)} 筛选接口均成功返回空结果；未确认基金终止或晨星完全未收录",
+                    }, ""))
                 frame = _upsert_result(frame, isin, info, isin_list[isin].bank_str(), source)
             _save_checkpoint(frame, path)
             print(
@@ -181,13 +223,16 @@ def make_isin_map(isin_map: dict[str, ISINInfo], isin_list: list[str], bank: str
         isin_map.setdefault(isin, ISINInfo(isin)).add_bank(bank)
 
 
-def main(market_order=None, refresh=False):
+def main(market_order=None, refresh=False, reference_path=None, diagnostics_path=None):
     isin_map = {}
     make_isin_map(isin_map, load_isin(global_values.hsbc_isin_excel_path), "汇丰")
     make_isin_map(isin_map, load_isin(global_values.sc_isin_excel_path), "渣打")
+    if reference_path is None:
+        historical = Path(global_values.project_dir, "files", "morningstar", "MorningStar.xlsx")
+        reference_path = historical if historical.is_file() else None
     return load_morningstar_code(
         isin_map, global_values.morningstar_code_excel_path,
-        market_order=market_order, refresh=refresh,
+        market_order=market_order, refresh=refresh, reference_path=reference_path, diagnostics_path=diagnostics_path,
     )
 
 
@@ -195,8 +240,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--markets", nargs="+", choices=tuple(MARKET_CONFIGS), default=DEFAULT_MARKET_ORDER,
-        help="查询市场及顺序，默认 HK UK",
+        help="查询市场及顺序，默认 HK UK GLOBAL",
     )
     parser.add_argument("--refresh", action="store_true", help="重新查询已有有效结果，应用当前市场优先级")
+    parser.add_argument("--reference", help="历史结果表，只用于同 ISIN 的实时候选消歧，默认使用 files 中的历史表")
+    parser.add_argument("--diagnostics", help="复用 morningstar_diagnose.py 获取的 JSON，离线重新匹配，不请求网络")
     args = parser.parse_args()
-    main(market_order=args.markets, refresh=args.refresh)
+    main(market_order=args.markets, refresh=args.refresh, reference_path=args.reference, diagnostics_path=args.diagnostics)
