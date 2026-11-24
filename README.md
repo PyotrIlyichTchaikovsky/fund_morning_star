@@ -45,13 +45,32 @@ UK 当前使用 Compare、Overview、SustainabilitySAL 三类页面；HK 当前�
 
 ## 运行方式
 
-使用 Python 3.10 或更高版本，网页抓取需要 Chrome。建议重新创建本机虚拟环境，不复用其他电脑复制来的 `.venv`。
+建议使用标准 64 位 Python 3.14（非 free-threaded 版本），网页抓取需要 Chrome。`requirements.txt` 只列代码直接使用的 7 项依赖；Pillow 等间接依赖由 pip 自动安装。pandas 使用支持 Python 3.14 的 2.3.3 及以上 2.x 版本，暂不升级到 3.x。
+
+使用电脑上已经安装的标准 64 位 Python 3.14 创建本项目的 `.venv`。基础 Python 使用系统安装目录，项目依赖只安装到 `.venv`，不另外下载项目内的基础 Python。下面使用默认安装路径；如果安装到其他位置，请修改 `$python314`。
+
+以下命令用于初次安装或重建环境；日常运行直接使用已有的 `.venv`。重建前关闭项目终端和 PyCharm 中运行的程序。先确认基础解释器版本，再备份旧环境并重建，每一步成功后再执行下一步。不要复用其他 Python 版本的 site-packages，也不要通过全局 `pip uninstall` 清理其他项目的依赖。
 
 在项目根目录执行：
 
 ```powershell
-python -m venv .venv
+Set-Location 'H:\MyWork\FundMorningStar\fund_morning_star'
+$python314 = "$env:LOCALAPPDATA\Programs\Python\Python314\python.exe"
+& $python314 --version
+
+# 确认上面显示 3.14.x 后，再执行以下步骤。
+if (Test-Path -LiteralPath .venv) {
+    Rename-Item -LiteralPath .venv -NewName ('.venv-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+}
+& $python314 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -c "import pandas, numpy, bs4, pdfplumber, requests, selenium, webdriver_manager, openpyxl; print('Dependencies OK')"
+.\.venv\Scripts\python.exe --version
+
+# PyCharm 的项目解释器设为本项目 .venv\Scripts\python.exe。
+# 日常执行脚本无需激活环境，也不依赖 PATH 中的 python / py 命令。
 
 .\.venv\Scripts\python.exe hsbc_1_extract_fund_pdfs.py
 .\.venv\Scripts\python.exe hsbc_2_generate_isin.py

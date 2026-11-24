@@ -26,6 +26,8 @@ hsbc_qdii_excel_path = os.path.join(base_dir, "hsbc/QDII.xlsx")
 hsbc_fund_pdfs_dir = os.path.join(base_dir, "hsbc/funds")  # 保存下载的 PDF 文件的目录
 hsbc_isin_excel_path = os.path.join(base_dir, "hsbc/ISIN_HSBC.xlsx")
 
+sc_qdii_excel_path = os.path.join(base_dir, "sc/QDII.xlsx")
+sc_fund_pdfs_dir = os.path.join(base_dir, "sc/funds")
 sc_original_funds_info_path = os.path.join(base_dir, "sc/funds_table_html_sc.txt")  # 原始 PDF 文件
 sc_isin_excel_path = os.path.join(base_dir, "sc/ISIN_SC.xlsx")
 
@@ -111,4 +113,3 @@ morningstar_page_template_dict = {
     source_key_uk: [ms_page_uk_compare, ms_page_uk_overview, ms_page_uk_sustainability],
     source_key_hk: [ms_page_hk_search]
 }
-

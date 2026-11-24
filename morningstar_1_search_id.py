@@ -1,127 +1,202 @@
+"""读取汇丰、渣打 ISIN，查询晨星基金 ID 并断点保存到 MorningStar.xlsx。"""
+
+import argparse
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
 import pandas as pd
-import os
+import requests
 
 import global_values
-from morningstar_isin_query import get_fund_info_with_retry
+from morningstar_isin_query import (
+    DEFAULT_MARKET_ORDER,
+    ISIN_PATTERN,
+    MARKET_CONFIGS,
+    MorningstarQueryError,
+    get_funds_info_with_retry,
+    is_valid_fund_info,
+    normalize_market_order,
+)
+
+OUTPUT_COLUMNS = ["ISIN", "MorningStarName", "MorningStarID", "Bank", "Source"]
 
 
+@dataclass
 class ISINInfo:
-    def __init__(self, isin_id: str):
-        self.isin_id: str = isin_id
-        self.bank_list: [str] = []
+    isin_id: str
+    bank_list: list[str] = field(default_factory=list)
 
     def add_bank(self, bank: str):
-        self.bank_list.append(bank)
+        if bank not in self.bank_list:
+            self.bank_list.append(bank)
 
     def bank_str(self) -> str:
         return "+".join(self.bank_list)
 
 
-def load_morningstar_code(isin_list: dict[str: ISINInfo], out_excel_path):
-    # 初始化或读取已有Excel文件
-    if os.path.exists(out_excel_path):
-        df = pd.read_excel(out_excel_path)
-    else:
-        df = pd.DataFrame(columns=['ISIN', 'MorningStarName', 'MorningStarID'])
+def _load_cached_results(path):
+    if not path.is_file():
+        return pd.DataFrame(columns=OUTPUT_COLUMNS)
+    frame = pd.read_excel(path, engine="openpyxl", dtype=str, keep_default_na=False)
+    if "ISIN" not in frame.columns:
+        raise ValueError(f"{path} 缺少 ISIN 列，无法读取已有查询结果。")
+    for column in OUTPUT_COLUMNS:
+        if column not in frame.columns:
+            frame[column] = ""
+    frame["ISIN"] = frame["ISIN"].str.strip().str.upper()
+    frame = frame.loc[frame["ISIN"].str.fullmatch(ISIN_PATTERN)].copy()
+    kept = []
+    for _, group in frame.groupby("ISIN", sort=False):
+        valid = group.loc[
+            group.apply(lambda row: is_valid_fund_info({"n": row["MorningStarName"], "i": row["MorningStarID"]}),
+                        axis=1)]
+        kept.append((valid if not valid.empty else group).iloc[-1])
+    return pd.DataFrame(kept, columns=frame.columns).reset_index(drop=True)
 
-    # 转换ISIN列为字符串类型
-    df['ISIN'] = df['ISIN'].astype(str)
 
-    total_count = len(isin_list.values())
-    for index, isin_info in enumerate(isin_list.values(), start=1):
-        print(f"正在处理：[{index}/{total_count}]")
-        isin = str(isin_info.isin_id).strip()
-        bank_info = isin_info.bank_str()
-
-        # ====== 条件检查逻辑 ======
-        # 检查是否已有有效记录：已经存在了ISIN，并且MorningStarName和MorningStarID是有效的（不为空和Exception）
-        existing_record = df[
-            (df['ISIN'] == isin) &
-            (df['MorningStarName'].fillna('').str.contains('Exception') == False) &
-            (df['MorningStarName'].fillna('').str.strip() != '') &
-            (df['MorningStarID'].fillna('').str.contains('Exception') == False) &
-            (df['MorningStarID'].fillna('').str.strip() != '')
-            ]
-
-        if not existing_record.empty:
-            print(f"已存在有效ISIN记录：{isin}，跳过处理")
-            # 更新已有记录中的Bank列
-            df.loc[df['ISIN'] == isin, 'Bank'] = bank_info
-            continue
-
-        source = 'UK'
-        # ====== 数据获取逻辑 ======
+def _save_checkpoint(frame, path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with NamedTemporaryFile(dir=path.parent, prefix=f".{path.stem}_", suffix=".xlsx", delete=False) as handle:
+        temporary = Path(handle.name)
+    try:
+        frame.to_excel(temporary, index=False, engine="openpyxl")
         try:
-            # 调用接口获取数据
-            fund_info = get_fund_info_with_retry(global_values.morningstar_code_search_url_uk, isin)
+            temporary.replace(path)
+        except PermissionError as exc:
+            raise PermissionError(f"无法保存 {path}，请关闭占用该文件的 Excel 等程序后重试。") from exc
+    finally:
+        temporary.unlink(missing_ok=True)
 
-            # 提取字段并验证
-            morningstar_name = fund_info.get('n', 'Exception')
-            morningstar_id = fund_info.get('i', 'Exception')
 
-            if 'NotFound' in [morningstar_name, morningstar_id]:
-                fund_info = get_fund_info_with_retry(global_values.morningstar_code_search_url_hk, isin)
-                morningstar_name = fund_info.get('n', 'Exception')
-                morningstar_id = fund_info.get('i', 'Exception')
-                source = 'HK'
+def _upsert_result(frame, isin, info, bank, source):
+    frame = frame.loc[frame["ISIN"] != isin]
+    record = {"ISIN": isin, "MorningStarName": info["n"], "MorningStarID": info["i"], "Bank": bank, "Source": source}
+    row = pd.DataFrame([record]).reindex(columns=frame.columns, fill_value="")
+    return pd.concat([frame, row], ignore_index=True)
 
-        except Exception as e:
-            print(f"ISIN {isin} 数据获取失败：{str(e)}")
-            morningstar_name = f"Exception: {str(e)}"
-            morningstar_id = f"Exception: {str(e)}"
 
-        # ====== 数据存储逻辑 ======
-        # 删除该ISIN所有旧记录（如果有）
-        df = df[df['ISIN'] != isin]
+def load_morningstar_code(
+        isin_list: dict[str, ISINInfo], out_excel_path, batch_size=50, request_delay=0.2,
+        market_order=None, refresh=False,
+):
+    """默认先香港、后英国；按配置补查未命中项，refresh=True 时重新查询有效缓存。"""
+    if not 1 <= batch_size <= 50 or request_delay < 0:
+        raise ValueError("batch_size 应为 1 至 50，request_delay 不能为负数。")
+    markets = normalize_market_order(market_order)
+    path = Path(out_excel_path)
+    frame = _load_cached_results(path)
+    valid_codes = set()
+    for index, row in frame.iterrows():
+        isin = row["ISIN"]
+        if isin in isin_list:
+            frame.at[index, "Bank"] = isin_list[isin].bank_str()
+            if is_valid_fund_info({"n": row["MorningStarName"], "i": row["MorningStarID"]}):
+                valid_codes.add(isin)
+    pending = [isin for isin in isin_list if refresh or isin not in valid_codes]
+    print(f"查询顺序：{' → '.join(markets)}。")
+    print(f"共 {len(isin_list)} 个 ISIN，已有有效结果 {len(valid_codes)} 个，待查询 {len(pending)} 个。")
 
-        # 添加新记录
-        new_row = pd.DataFrame([{
-            'ISIN': isin,
-            'Bank': bank_info,
-            'MorningStarName': morningstar_name,
-            'MorningStarID': morningstar_id,
-            'Source': source
-        }])
+    with requests.Session() as session:
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start:start + batch_size]
+            unresolved = list(batch)
+            errors = {}
+            request_errors = {}
+            for source in markets:
+                if not unresolved:
+                    break
+                try:
+                    results = get_funds_info_with_retry(source, unresolved, session=session)
+                except MorningstarQueryError as exc:
+                    request_errors[source] = exc
+                    print(f"[{source} 查询失败] {exc}，将继续尝试其他已配置市场。")
+                    continue
+                remaining = []
+                changed = False
+                for isin in unresolved:
+                    info = results[isin]
+                    if is_valid_fund_info(info):
+                        frame = _upsert_result(frame, isin, info, isin_list[isin].bank_str(), source)
+                        changed = True
+                    else:
+                        remaining.append(isin)
+                        if info.get("i") != "NotFound":
+                            errors[isin] = (info, source)
+                unresolved = remaining
+                if changed:
+                    _save_checkpoint(frame, path)
+            if len(request_errors) == len(markets):
+                if not frame.empty:
+                    _save_checkpoint(frame, path)
+                print("[查询中止] 所有已配置市场均请求失败，已保留现有结果。")
+                details = "；".join(f"{source}: {exc}" for source, exc in request_errors.items())
+                raise MorningstarQueryError(details)
+            for isin in unresolved:
+                if request_errors:
+                    if isin in valid_codes:
+                        print(f"[保留缓存] {isin} 的补查请求失败，保留原有效结果。")
+                        continue
+                    source = next(iter(request_errors))
+                    details = "；".join(f"{market}: {exc}" for market, exc in request_errors.items())
+                    info = {"n": f"Exception: {details}", "i": "Exception"}
+                else:
+                    info, source = errors.get(isin, ({"n": "NotFound", "i": "NotFound"}, ""))
+                frame = _upsert_result(frame, isin, info, isin_list[isin].bank_str(), source)
+            _save_checkpoint(frame, path)
+            print(
+                f"[查询进度] {min(start + len(batch), len(pending))}/{len(pending)}，本批找到 {len(batch) - len(unresolved)} 个。")
+            if request_delay and start + len(batch) < len(pending):
+                time.sleep(request_delay)
 
-        df = pd.concat([df, new_row], ignore_index=True)
-
-        # 实时保存（每次更新后立即写入）
-        df.to_excel(out_excel_path, index=False)
-        print(f"已更新ISIN记录：{isin} ->{morningstar_id}({source}: {morningstar_name})")
-
-    df.to_excel(out_excel_path, index=False)
-    return df
+    _save_checkpoint(frame, path)
+    current = frame.loc[frame["ISIN"].isin(isin_list)]
+    found = sum(
+        is_valid_fund_info({"n": row["MorningStarName"], "i": row["MorningStarID"]}) for _, row in current.iterrows())
+    not_found = current["MorningStarID"].eq("NotFound").sum()
+    print(f"处理完成：匹配成功 {found}，未找到 {not_found}，待核对 {len(current) - found - not_found}。")
+    print(f"结果已保存：{path.resolve()}")
+    return frame
 
 
 def load_isin(isin_excel_path):
-    # 读取Excel文件
-    df = pd.read_excel(isin_excel_path, engine='openpyxl')
+    frame = pd.read_excel(isin_excel_path, engine="openpyxl", dtype=str)
+    if "ISIN代码" not in frame.columns:
+        raise ValueError(f"{isin_excel_path} 中缺少「ISIN代码」列。")
+    codes = frame["ISIN代码"].dropna().str.strip().str.upper()
+    invalid = codes.loc[~codes.str.fullmatch(ISIN_PATTERN)]
+    if not invalid.empty:
+        print(f"[跳过无效ISIN] {isin_excel_path}：{invalid.drop_duplicates().tolist()}")
+    result = codes.loc[codes.str.fullmatch(ISIN_PATTERN)].drop_duplicates().tolist()
+    print(f"读取 {isin_excel_path}：{len(frame)} 行，{len(result)} 个有效且不重复的 ISIN。")
+    if not result:
+        raise ValueError(f"{isin_excel_path} 中没有有效 ISIN。")
+    return result
 
-    # 打印原始数据统计
-    print(f"文件 {isin_excel_path} 已加载，共 {len(df)} 行数据")
 
-    # 提取ISIN列数据并去重
-    isin_array = df['ISIN代码'].drop_duplicates().tolist()  # 先去重再转列表
-
-    # 打印去重后统计
-    print(f"去重后获得 {len(isin_array)} 个唯一ISIN代码")
-
-    return isin_array
+def make_isin_map(isin_map: dict[str, ISINInfo], isin_list: list[str], bank: str):
+    for value in isin_list:
+        isin = value.strip().upper()
+        isin_map.setdefault(isin, ISINInfo(isin)).add_bank(bank)
 
 
-def make_isin_map(isin_map: dict[str: ISINInfo], isin_list: [str], bank: str):
-    for isin_id in isin_list:
-        if isin_id not in isin_map:
-            isin_map[isin_id] = ISINInfo(isin_id)
-        isin_map[isin_id].add_bank(bank)
+def main(market_order=None, refresh=False):
+    isin_map = {}
+    make_isin_map(isin_map, load_isin(global_values.hsbc_isin_excel_path), "汇丰")
+    make_isin_map(isin_map, load_isin(global_values.sc_isin_excel_path), "渣打")
+    return load_morningstar_code(
+        isin_map, global_values.morningstar_code_excel_path,
+        market_order=market_order, refresh=refresh,
+    )
 
 
 if __name__ == "__main__":
-    isin_list_hsbc = load_isin(global_values.hsbc_isin_excel_path)
-    isin_list_sc = load_isin(global_values.sc_isin_excel_path)
-
-    isin_map: dict[str, ISINInfo] = {}
-    make_isin_map(isin_map, isin_list_hsbc, "汇丰")
-    make_isin_map(isin_map, isin_list_sc, "渣打")
-
-    load_morningstar_code(isin_map, global_values.morningstar_code_excel_path)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--markets", nargs="+", choices=tuple(MARKET_CONFIGS), default=DEFAULT_MARKET_ORDER,
+        help="查询市场及顺序，默认 HK UK",
+    )
+    parser.add_argument("--refresh", action="store_true", help="重新查询已有有效结果，应用当前市场优先级")
+    args = parser.parse_args()
+    main(market_order=args.markets, refresh=args.refresh)
