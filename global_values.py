@@ -1,12 +1,25 @@
 from __future__ import annotations  # 自动处理前向引用
 
 import os
+from configparser import ConfigParser
 from typing import List
 
 from base_define import MsPageTemplate, MsMetricKey, PercentageCell, DeviationCell, StarCell, ReturnOverallCell, \
     RiskOverallCell
 
-base_dir = r"files"
+project_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(project_dir, "config.ini")
+config = ConfigParser(interpolation=None)
+with open(config_path, encoding="utf-8-sig") as config_file:
+    config.read_file(config_file)
+
+data_dir = config.get("paths", "data_dir").strip()
+if not data_dir:
+    raise ValueError("config.ini 中的 [paths] data_dir 不能为空")
+base_dir = os.path.abspath(os.path.join(project_dir, data_dir))
+
+for sub_dir in ("cookies", "hsbc/funds", "sc", "morningstar/morningstar_pages"):
+    os.makedirs(os.path.join(base_dir, sub_dir), exist_ok=True)
 
 hsbc_original_pdf_path = os.path.join(base_dir, "hsbc/fund-nav.pdf")  # 原始 PDF 文件
 hsbc_qdii_excel_path = os.path.join(base_dir, "hsbc/QDII.xlsx")
@@ -35,8 +48,8 @@ morningstar_code_search_url_uk = morningstar_url_head['UK'] + morningstar_code_s
 morningstar_code_search_url_hk = morningstar_url_head['HK'] + morningstar_code_search_url_suffix
 
 cookie_path = {
-    source_key_uk: "files/cookies/cookies_uk.pkl",
-    source_key_hk: "files/cookies/cookies_hk.pkl"
+    source_key_uk: os.path.join(base_dir, "cookies/cookies_uk.pkl"),
+    source_key_hk: os.path.join(base_dir, "cookies/cookies_hk.pkl")
 }
 
 
